@@ -1,15 +1,30 @@
 {
   "dev": {
     "awscloudformation": {
-      "AuthRoleName": "amplify-greeenhousemonitor-dev-92713-authRole",
-      "UnauthRoleArn": "arn:aws:iam::711676230583:role/amplify-greeenhousemonitor-dev-92713-unauthRole",
-      "AuthRoleArn": "arn:aws:iam::711676230583:role/amplify-greeenhousemonitor-dev-92713-authRole",
+      "AuthRoleName": "amplify-greenhousemonitor-dev-181059-authRole",
+      "UnauthRoleArn": "arn:aws:iam::711676230583:role/amplify-greenhousemonitor-dev-181059-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::711676230583:role/amplify-greenhousemonitor-dev-181059-authRole",
       "Region": "eu-west-2",
-      "DeploymentBucketName": "amplify-greeenhousemonitor-dev-92713-deployment",
-      "UnauthRoleName": "amplify-greeenhousemonitor-dev-92713-unauthRole",
-      "StackName": "amplify-greeenhousemonitor-dev-92713",
-      "StackId": "arn:aws:cloudformation:eu-west-2:711676230583:stack/amplify-greeenhousemonitor-dev-92713/15a893f0-c0e4-11ee-9f31-02b610f5e213",
-      "AmplifyAppId": "d2i2iem9uazb8y"
+      "DeploymentBucketName": "amplify-greenhousemonitor-dev-181059-deployment",
+      "UnauthRoleName": "amplify-greenhousemonitor-dev-181059-unauthRole",
+      "StackName": "amplify-greenhousemonitor-dev-181059",
+      "StackId": "arn:aws:cloudformation:eu-west-2:711676230583:stack/amplify-greenhousemonitor-dev-181059/4105c3d0-c12d-11ee-9cfc-06a990a9cc61",
+      "AmplifyAppId": "dtuhyeerpwwic",
+      "APIGatewayAuthURL": "https://s3.amazonaws.com/amplify-greenhousemonitor-dev-181059-deployment/amplify-cfn-templates/api/APIGatewayAuthStack.json"
+    },
+    "categories": {
+      "function": {
+        "DataFunction": {
+          "deploymentBucketName": "amplify-greenhousemonitor-dev-181059-deployment",
+          "s3Key": "amplify-builds/DataFunction-644f4d2f715755667566-build.zip"
+        }
+      },
+      "api": {
+        "DataHandler": {}
+      },
+      "auth": {
+        "greenhousemonitordbbb8735": {}
+      }
     }
   }
 }

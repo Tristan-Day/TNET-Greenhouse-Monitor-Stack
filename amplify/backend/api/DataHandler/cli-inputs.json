@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "paths": {
+    "/data/{device}": {
+      "name": "/data/{device}",
+      "lambdaFunction": "DataFunction",
+      "permissions": {
+        "setting": "private",
+        "auth": [
+          "read"
+        ]
+      }
+    }
+  }
+}
