@@ -49,6 +49,11 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     },
+    "GreenhouseMonitorRegistrationFunction": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
     "GreenhouseMonitorTaskFunction": {
       "build": true,
       "dependsOn": [],
@@ -86,6 +91,22 @@
         {
           "category": "function",
           "resourceName": "GreenhouseMonitorDataFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorRegistrationFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorRegistrationFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorRegistrationFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorRegistrationFunction"
         }
       ]
     },

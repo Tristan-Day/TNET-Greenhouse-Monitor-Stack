@@ -10,7 +10,7 @@ const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 
 async function timestampDevices(range) {
-  // #swagger.description = 'Update the transmission timestamps for devices wtihin a given range
+  // #swagger.description = 'Update the transmission timestamps for devices wtihin a given range'
 
   const expression = {
     TableName: 'GreenhouseMonitor-Data',
