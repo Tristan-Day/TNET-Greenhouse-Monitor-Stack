@@ -20,11 +20,16 @@
         },
         "GreenhouseMonitorDataFunction": {
           "deploymentBucketName": "amplify-greenhousemonitor-dev-181059-deployment",
-          "s3Key": "amplify-builds/GreenhouseMonitorDataFunction-53454d6343657358526c-build.zip"
+          "s3Key": "amplify-builds/GreenhouseMonitorDataFunction-5470794f4135794d3336-build.zip"
+        },
+        "GreenhouseMonitorTaskFunction": {
+          "deploymentBucketName": "amplify-greenhousemonitor-dev-181059-deployment",
+          "s3Key": "amplify-builds/GreenhouseMonitorTaskFunction-47313547304633777344-build.zip"
         }
       },
       "api": {
-        "DataHandler": {}
+        "DataHandler": {},
+        "GreenhouseMonitorDataHandler": {}
       },
       "auth": {
         "greenhousemonitordbbb8735": {},
