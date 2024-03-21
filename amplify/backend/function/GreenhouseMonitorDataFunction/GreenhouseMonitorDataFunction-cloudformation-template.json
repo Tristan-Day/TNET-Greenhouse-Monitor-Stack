@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "{\"createdOn\":\"Windows\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.8.2\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
+  "Description": "{\"createdOn\":\"Linux\",\"createdBy\":\"Amplify\",\"createdWith\":\"12.10.1\",\"stackType\":\"function-Lambda\",\"metadata\":{}}",
   "Parameters": {
     "CloudWatchRule": {
       "Type": "String",
@@ -47,12 +47,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "DataFunction",
+            "GreenhouseMonitorDataFunction",
             {
               "Fn::Join": [
                 "",
                 [
-                  "DataFunction",
+                  "GreenhouseMonitorDataFunction",
                   "-",
                   {
                     "Ref": "env"
@@ -89,12 +89,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "greenhousemonitorLambdaRole2ba0030e",
+            "greenhousemonitorLambdaRole32f40c0d",
             {
               "Fn::Join": [
                 "",
                 [
-                  "greenhousemonitorLambdaRole2ba0030e",
+                  "greenhousemonitorLambdaRole32f40c0d",
                   "-",
                   {
                     "Ref": "env"

@@ -1,10 +1,10 @@
 {
   "version": "1",
   "cognitoConfig": {
-    "identityPoolName": "greenhousemonitordbbb8735_identitypool_dbbb8735",
+    "identityPoolName": "GreenhouseMonitorIdentityPool",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "greenhdbbb8735",
-    "userPoolName": "greenhousemonitordbbb8735_userpool_dbbb8735",
+    "resourceNameTruncated": "greenh4b5a9c01",
+    "userPoolName": "GreenhouseMonitorUserPool",
     "autoVerifiedAttributes": [
       "email"
     ],
@@ -24,23 +24,27 @@
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
-    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientRefreshTokenValidity": "60",
     "userpoolClientWriteAttributes": [
       "email"
     ],
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "greenhdbbb8735_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "Greenh4b5a9c01_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "dbbb8735",
-    "resourceName": "greenhousemonitordbbb8735",
+    "sharedId": "4b5a9c01",
+    "resourceName": "GreenhouseMonitorAuth",
     "authSelections": "identityPoolAndUserPool",
-    "useDefault": "default",
+    "useDefault": "manual",
+    "thirdPartyAuth": false,
     "usernameAttributes": [
       "email"
     ],
+    "userPoolGroups": false,
+    "adminQueries": false,
     "triggers": {},
+    "hostedUI": false,
     "userPoolGroupList": [],
     "serviceName": "Cognito",
     "usernameCaseSensitive": false,

@@ -1,6 +1,6 @@
 {
   "api": {
-    "DataHandler": {
+    "GreenhouseMonitorDataHandler": {
       "dependsOn": [
         {
           "attributes": [
@@ -8,7 +8,7 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "DataFunction"
+          "resourceName": "GreenhouseMonitorDataFunction"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -16,7 +16,7 @@
     }
   },
   "auth": {
-    "greenhousemonitordbbb8735": {
+    "GreenhouseMonitorAuth": {
       "customAuth": false,
       "dependsOn": [],
       "frontendAuthConfig": {
@@ -44,7 +44,7 @@
     }
   },
   "function": {
-    "DataFunction": {
+    "GreenhouseMonitorDataFunction": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
@@ -64,6 +64,22 @@
         {
           "category": "function",
           "resourceName": "DataFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorDataFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorDataFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorDataFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorDataFunction"
         }
       ]
     }

@@ -20,15 +20,13 @@ app.use(function (req, res, next) {
 })
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
-const { DynamoDBDocumentClient, ScanCommand } = require('@aws-sdk/lib-dynamodb')
+const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb')
 
 const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 
 // Units in Millisecconds
-const CHRONOS_MIN = 60000
-const CHRONOS_HOUR = CHRONOS_MIN * 60
-const CHRONOS_DAY = CHRONOS_HOUR * 24
+const CHRONOS_DAY = 1000 * 60 * 60 * 24
 
 app.get('/data/:device', function (req, res) {
   // #swagger.description = 'Retreives data for a specified device within a given range'
@@ -40,38 +38,46 @@ app.get('/data/:device', function (req, res) {
   } */
 
   // Set the default range
-  const range = CHRONOS_DAY
+  let range = CHRONOS_DAY
   if (req.query.range) {
     range = req.query.range
   }
 
-  const filterExpression = {
-    FilterExpression:
-      '#deviceAttribute = :device AND #timeAttribute BETWEEN :start AND :end ',
+  const expression = {
+    TableName: 'GreenhouseMonitor-Data',
+    KeyConditionExpression:
+      '#deviceAttribute = :deviceName AND #timestampAttribute BETWEEN :start AND :end',
     ExpressionAttributeNames: {
-      '#timeAttribute': 'TIMESTAMP',
-      '#deviceAttribute': 'DEVICE',
-      '#dataAttribute': 'DATA'
+      '#timestampAttribute': 'TIMESTAMP',
+      '#deviceAttribute': 'DEVICE'
     },
     ExpressionAttributeValues: {
-      ':device': req.params.device,
+      ':deviceName': req.params.device,
       ':start': new Date().getTime() - range,
       ':end': new Date().getTime()
-    },
-    ProjectionExpression: '#timeAttribute, #dataAttribute'
+    }
   }
 
   dynamo
-    .send(
-      new ScanCommand({ TableName: 'GreenhouseData-dev', ...filterExpression })
-    )
+    .send(new QueryCommand(expression))
     .then(result => {
-      console.log('Scan complete')
+      if (result.Count === 0) {
+        res.status(404).json(new Error('No items found'))
+        return
+      }
+
+      result.Items.sort((a, b) => {
+        // Since the timestamps will never be equal we only perform a single check
+        if (parseInt(a.TIMESTAMP) > parseInt(b.TIMESTAMP)) {
+          return 1
+        }
+        return -1
+      })
+
       res.status(200).json(result)
     })
-    .catch(error => {
-      console.log(error)
-      res.status(500).json(error)
+    .catch(() => {
+      res.status(500)
     })
 })
 

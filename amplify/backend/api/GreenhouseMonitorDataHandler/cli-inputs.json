@@ -3,7 +3,7 @@
   "paths": {
     "/data/{device}": {
       "name": "/data/{device}",
-      "lambdaFunction": "DataFunction",
+      "lambdaFunction": "GreenhouseMonitorDataFunction",
       "permissions": {
         "setting": "private",
         "auth": [
