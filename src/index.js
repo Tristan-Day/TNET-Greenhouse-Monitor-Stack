@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom'
 
 import '@aws-amplify/ui-react/styles.css'
 
+import './App.css'
 import App from './App'
 
 ReactDOM.render(

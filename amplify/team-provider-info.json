@@ -24,7 +24,7 @@
         },
         "GreenhouseMonitorTaskFunction": {
           "deploymentBucketName": "amplify-greenhousemonitor-dev-181059-deployment",
-          "s3Key": "amplify-builds/GreenhouseMonitorTaskFunction-516442347954454c5561-build.zip"
+          "s3Key": "amplify-builds/GreenhouseMonitorTaskFunction-33476c38565a53427049-build.zip"
         },
         "GreenhouseMonitorRegistrationFunction": {
           "deploymentBucketName": "amplify-greenhousemonitor-dev-181059-deployment",
