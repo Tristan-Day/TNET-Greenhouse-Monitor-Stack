@@ -1,18 +1,15 @@
-import { Amplify } from 'aws-amplify'
+import { withAuthenticator } from '@aws-amplify/ui-react'
 
-import { Authenticator, withAuthenticator } from '@aws-amplify/ui-react'
+import { createContext, useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+
+import { CssBaseline } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { createContext, useEffect, useState } from 'react'
-
-import Navigation from './Navigation'
+import { Navigation } from './Navigation'
 import Dashboard from './Dashboard'
 
-import Settings from './subpage/Settings'
-
-import awsExports from './aws-exports'
-Amplify.configure(awsExports)
+import SettingsRoutes from './subpage/Settings'
 
 let theme = 'light'
 if (
@@ -22,20 +19,32 @@ if (
   theme = 'dark'
 }
 
+export const DeviceContext = createContext({ devices: [] })
+
 function App() {
+  const [devices, setDevices] = useState({
+    devices: []
+  })
+
+  useEffect(() => {
+    // Code to retreive the list of registered devices
+  }, [])
+
   return (
-    <Authenticator>
+    <DeviceContext.Provider value={devices}>
       <BrowserRouter>
         <ThemeProvider theme={createTheme({ palette: { mode: theme } })}>
-          <Routes>
-            <Route path="*" element={<Navigation />}>
-              <Route index path="*" element={<Dashboard />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
+          <CssBaseline>
+            <Routes>
+              <Route path="*" element={<Navigation />}>
+                {SettingsRoutes()}
+                <Route index path="*" element={<Dashboard />} />
+              </Route>
+            </Routes>
+          </CssBaseline>
         </ThemeProvider>
       </BrowserRouter>
-    </Authenticator>
+    </DeviceContext.Provider>
   )
 }
 
