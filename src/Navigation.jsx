@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { createContext, useState } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 import { signOut } from 'aws-amplify/auth'
@@ -17,10 +17,14 @@ import {
   Drawer
 } from '@mui/material'
 
-import MenuIcon from '@mui/icons-material/Menu'
-import LogoutIcon from '@mui/icons-material/Logout'
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
-import SettingsIcon from '@mui/icons-material/Settings'
+import {
+  MenuOutlined,
+  SettingsOutlined,
+  LogoutOutlined,
+  ChevronLeft
+} from '@mui/icons-material'
+
+import { MonitoringIcon } from './subpage/component/icon/MonitoringIcon'
 
 const DrawerProps = {
   variant: 'persistent',
@@ -42,61 +46,75 @@ const DrawerHeader = styled('div')(({ theme }) => ({
   justifyContent: 'space-between'
 }))
 
-function Titlebar({ setOpen }) {
+export const WindowContext = createContext()
+
+function Titlebar({ window, setDrawerOpen }) {
   const navigate = useNavigate()
 
   return (
     <AppBar sx={{ position: 'sticky', top: 0 }}>
       <Toolbar>
         <IconButton
+          sx={{ marginRight: '1.2rem' }}
           onClick={() => {
-            setOpen(true)
+            setDrawerOpen(true)
           }}
+          color="inherit"
         >
-          <MenuIcon />
+          <MenuOutlined />
         </IconButton>
-
-        <Box sx={{ display: 'flex', gap: '1rem', marginLeft: '1rem' }}>
-          <img src="./Logo.svg" width='30'/>
-          <Typography variant="h6">Greenhouse Monitor</Typography>
+        <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <MonitoringIcon size={30} />
+          <Typography variant="h6">{window.title}</Typography>
         </Box>
 
         <Box sx={{ flexGrow: 1 }} />
+
+        <Box>
+          <Typography variant="h7">{window.message}</Typography>
+        </Box>
         <IconButton
+          sx={{ marginLeft: '1.2rem' }}
           onClick={() => {
+            setDrawerOpen(false)
             navigate('settings')
           }}
+          color="inherit"
         >
-          <SettingsIcon />
+          <SettingsOutlined />
         </IconButton>
       </Toolbar>
     </AppBar>
   )
 }
 
-function Navigation() {
-  const [open, setOpen] = useState(false)
+export function Navigation() {
+  const [window, setWindow] = useState({
+    title: 'Greenhouse Monitor'
+  })
+
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
-    <Box>
-      <Titlebar setOpen={setOpen} />
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      <Titlebar window={window} setDrawerOpen={setDrawerOpen} />
 
-      <Drawer {...DrawerProps} open={open}>
+      <Drawer {...DrawerProps} open={drawerOpen}>
         <DrawerHeader>
           <Typography variant="h6" marginLeft="1rem">
             Greenhouse Monitor
           </Typography>
           <IconButton
             onClick={() => {
-              setOpen(false)
+              setDrawerOpen(false)
             }}
           >
-            <ChevronLeftIcon />
+            <ChevronLeft />
           </IconButton>
         </DrawerHeader>
-
         <Divider />
-        <Box flexGrow="30" />
+
+        <Box sx={{ flexGrow: '30' }} />
 
         <Divider />
         <ListItemButton
@@ -105,14 +123,15 @@ function Navigation() {
           }}
         >
           <ListItemIcon>
-            <LogoutIcon />
+            <LogoutOutlined />
           </ListItemIcon>
           <ListItemText primary="Logout" />
         </ListItemButton>
       </Drawer>
-      <Outlet />
+
+      <WindowContext.Provider value={{ window: window, setWindow: setWindow }}>
+        <Outlet />
+      </WindowContext.Provider>
     </Box>
   )
 }
-
-export default Navigation
