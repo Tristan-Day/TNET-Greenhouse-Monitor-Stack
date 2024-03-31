@@ -13,6 +13,20 @@
       ],
       "providerPlugin": "awscloudformation",
       "service": "API Gateway"
+    },
+    "GreenhouseMonitorUserHandler": {
+      "dependsOn": [
+        {
+          "attributes": [
+            "Name",
+            "Arn"
+          ],
+          "category": "function",
+          "resourceName": "GreenhouseMonitorUserFunction"
+        }
+      ],
+      "providerPlugin": "awscloudformation",
+      "service": "API Gateway"
     }
   },
   "auth": {
@@ -49,6 +63,16 @@
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
+    },
+    "GreenhouseMonitorRegistrar": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "GreenhouseMonitorUserFunction": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
     }
   },
   "parameters": {
@@ -81,6 +105,38 @@
         {
           "category": "function",
           "resourceName": "GreenhouseMonitorDataFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorRegistrar_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorRegistrar"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorRegistrar_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorRegistrar"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorUserFunction_deploymentBucketName": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorUserFunction"
+        }
+      ]
+    },
+    "AMPLIFY_function_GreenhouseMonitorUserFunction_s3Key": {
+      "usedBy": [
+        {
+          "category": "function",
+          "resourceName": "GreenhouseMonitorUserFunction"
         }
       ]
     }

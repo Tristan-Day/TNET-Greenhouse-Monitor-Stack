@@ -13,75 +13,88 @@ app.use(require('body-parser').json())
 app.use(require('aws-serverless-express/middleware').eventContext())
 
 // Enable CORS for all methods
-app.use(function (req, res, next) {
+app.use(function (req, res, next) 
+{
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', '*')
   next()
 })
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb')
-const { DynamoDBDocumentClient, QueryCommand } = require('@aws-sdk/lib-dynamodb')
+const { DynamoDBDocumentClient } = require('@aws-sdk/lib-dynamodb')
+const { QueryCommand } = require('@aws-sdk/lib-dynamodb')
 
 const client = new DynamoDBClient({})
 const dynamo = DynamoDBDocumentClient.from(client)
 
-// Units in Millisecconds
-const CHRONOS_DAY = 1000 * 60 * 60 * 24
-
-app.get('/data/:device', function (req, res) {
+app.get('/data/:device', async function(req, res) 
+{
   // #swagger.description = 'Retreives data for a specified device within a given range'
 
-  /* #swagger.parameters['range'] = {
-        in: 'body',                            
-        description: 'Range in milliseconds (eg. 60000 for 1 Minute)',
-        required: false                   
+  /* #swagger.parameters['device'] = {
+        in: 'path',
+        description: 'Device identifier',
+        required: true
   } */
 
-  // Set the default range
-  let range = CHRONOS_DAY
-  if (req.query.range) {
-    range = req.query.range
-  }
+  /* #swagger.parameters['range'] = {
+        in: 'body',
+        description: 'Range in milliseconds (eg. 60000 for 1 Minute)',
+        required: false
+  } */
 
-  const expression = {
-    TableName: 'GreenhouseMonitor-Data',
+    // Set the default range
+  const CHRONOS_DAY = 1000 * 60 * 60 * 24
+  const  range = req.query.range || CHRONOS_DAY
+
+  const expression = 
+  {
+    TableName:
+      'GreenhouseMonitor-data',
     KeyConditionExpression:
-      '#deviceAttribute = :deviceName AND #timestampAttribute BETWEEN :start AND :end',
-    ExpressionAttributeNames: {
+      '#deviceAttribute = :device AND #timestampAttribute BETWEEN :start AND :end',
+    ExpressionAttributeNames: 
+    {
       '#timestampAttribute': 'TIMESTAMP',
       '#deviceAttribute': 'DEVICE'
     },
-    ExpressionAttributeValues: {
-      ':deviceName': req.params.device,
+    ExpressionAttributeValues: 
+    {
+      ':device': req.params.device,
       ':start': new Date().getTime() - range,
       ':end': new Date().getTime()
     }
   }
 
-  dynamo
-    .send(new QueryCommand(expression))
-    .then(result => {
-      if (result.Count === 0) {
-        res.status(404).json(new Error('No items found'))
-        return
+  try
+  {
+    let result = await dynamo.send(new QueryCommand(expression))
+
+    if (result.Count === 0)
+    {
+      res.status(404).json({error : 'No items found'})
+      return
+    }
+
+    result.Items.sort((a, b) => {
+      // Since the timestamps will never be equal we only perform a single check
+      if (parseInt(a.TIMESTAMP) > parseInt(b.TIMESTAMP))
+      {
+        return 1
       }
-
-      result.Items.sort((a, b) => {
-        // Since the timestamps will never be equal we only perform a single check
-        if (parseInt(a.TIMESTAMP) > parseInt(b.TIMESTAMP)) {
-          return 1
-        }
-        return -1
-      })
-
-      res.status(200).json(result)
+      return -1
     })
-    .catch(() => {
-      res.status(500)
-    })
+
+    res.status(200).json(result.Items)
+  }
+  catch
+  {
+    res.status(500).json({error : 'Error executing query'})
+  }
 })
 
-app.listen(3000, function () {
+app.listen(3000, function () 
+{
   console.log('App started')
 })
 
