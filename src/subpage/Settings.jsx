@@ -59,7 +59,7 @@ function Settings() {
   })
 
   const handleChange = (_, value) => {
-    navigate.navigate(SettingsContents[value].URL)
+    navigate(SettingsContents[value].URL)
     setTab(value)
   }
 
