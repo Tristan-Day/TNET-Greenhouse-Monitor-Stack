@@ -29,7 +29,8 @@
           "passwordPolicyMinLength": 8
         },
         "signupAttributes": [
-          "EMAIL"
+          "EMAIL",
+          "NAME"
         ],
         "socialProviders": [],
         "usernameAttributes": [
@@ -46,17 +47,6 @@
   "function": {
     "GreenhouseMonitorDataFunction": {
       "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "GreenhouseMonitorRegistrationFunction": {
-      "build": true,
-      "providerPlugin": "awscloudformation",
-      "service": "Lambda"
-    },
-    "GreenhouseMonitorTaskFunction": {
-      "build": true,
-      "dependsOn": [],
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
@@ -91,38 +81,6 @@
         {
           "category": "function",
           "resourceName": "GreenhouseMonitorDataFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_GreenhouseMonitorRegistrationFunction_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "GreenhouseMonitorRegistrationFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_GreenhouseMonitorRegistrationFunction_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "GreenhouseMonitorRegistrationFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_GreenhouseMonitorTaskFunction_deploymentBucketName": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "GreenhouseMonitorTaskFunction"
-        }
-      ]
-    },
-    "AMPLIFY_function_GreenhouseMonitorTaskFunction_s3Key": {
-      "usedBy": [
-        {
-          "category": "function",
-          "resourceName": "GreenhouseMonitorTaskFunction"
         }
       ]
     }

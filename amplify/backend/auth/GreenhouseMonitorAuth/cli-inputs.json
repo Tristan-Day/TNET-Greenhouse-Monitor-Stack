@@ -3,7 +3,7 @@
   "cognitoConfig": {
     "identityPoolName": "GreenhouseMonitorIdentityPool",
     "allowUnauthenticatedIdentities": false,
-    "resourceNameTruncated": "greenh4b5a9c01",
+    "resourceNameTruncated": "greenh4034c7d6",
     "userPoolName": "GreenhouseMonitorUserPool",
     "autoVerifiedAttributes": [
       "email"
@@ -20,7 +20,8 @@
     "passwordPolicyMinLength": 8,
     "passwordPolicyCharacters": [],
     "requiredAttributes": [
-      "email"
+      "email",
+      "name"
     ],
     "aliasAttributes": [],
     "userpoolClientGenerateSecret": false,
@@ -31,9 +32,9 @@
     "userpoolClientReadAttributes": [
       "email"
     ],
-    "userpoolClientLambdaRole": "Greenh4b5a9c01_userpoolclient_lambda_role",
+    "userpoolClientLambdaRole": "Greenh4034c7d6_userpoolclient_lambda_role",
     "userpoolClientSetAttributes": false,
-    "sharedId": "4b5a9c01",
+    "sharedId": "4034c7d6",
     "resourceName": "GreenhouseMonitorAuth",
     "authSelections": "identityPoolAndUserPool",
     "useDefault": "manual",
