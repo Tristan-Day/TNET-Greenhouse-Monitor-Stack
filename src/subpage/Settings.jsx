@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { DeviceHub, InfoRounded } from '@mui/icons-material'
 
+import { Flex } from './component'
 import { AccountIcon } from './component/icon/AccountIcon'
 import { WindowContext } from '../Navigation'
 
@@ -27,14 +28,14 @@ function Header() {
   const navigate = useNavigate()
 
   return (
-    <Box sx={{ display: 'flex', margin: '1.2rem 1rem 1.2rem 1rem' }}>
-      <Box sx={{ display: 'flex', marginRight: 'auto', gap: '1rem' }}>
+    <Flex sx={{ margin: '1.2rem 1rem 1.2rem 1rem' }}>
+      <Flex sx={{ marginRight: 'auto', gap: '1rem' }}>
         <AccountIcon fill={useTheme().palette.text.primary} size={60} />
         <Box>
           <Typography variant="h6">Username</Typography>
           <Typography variant="h8">email@example.co.uk</Typography>
         </Box>
-      </Box>
+      </Flex>
       <Button
         variant="outlined"
         onClick={() => {
@@ -43,44 +44,58 @@ function Header() {
       >
         Return
       </Button>
-    </Box>
+    </Flex>
   )
 }
 
 function Settings() {
   const windowContext = useContext(WindowContext)
-  const [selection, setSelection] = useState(0)
+  const [tab, setTab] = useState(0)
 
   const navigate = useNavigate()
-
-  useEffect(() => {
-    windowContext.setWindow({ title: 'Settings' })
-  }, [])
-
-  const handleChange = (_, value) => {
-    navigate(SettingsContents[value].URL)
-    setSelection(value)
-  }
 
   const Contents = SettingsContents.map((entry, index) => {
     return <Tab key={index} label={entry.name} icon={entry.icon} />
   })
 
+  const handleChange = (_, value) => {
+    navigate.navigate(SettingsContents[value].URL)
+    setTab(value)
+  }
+
+  useEffect(() => {
+    windowContext.setWindow({ title: 'Settings' })
+  }, [])
+
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1}}>
+    <Flex direction="column" grow={1}>
       <Header />
       <Divider />
 
-      <Box sx={{ display: 'flex', flexGrow: 1}}>
-        <Tabs orientation="vertical" value={selection} onChange={handleChange} sx={{minWidth: 'fit-content'}}>
-          {Contents}
-        </Tabs>
-        <Divider flexItem orientation="vertical" />
-        <Box sx={{ display: 'flex', margin: '1rem', flexGrow: 1}}>
-          <Outlet />
-        </Box>
-      </Box>
-    </Box>
+      {isMobileView ? (
+        <Flex direction="column" grow={1}>
+          <Tabs value={tab} onChange={handleChange}>
+            {Contents}
+          </Tabs>
+          <Divider flexItem orientation="horizontal" />
+          <Flex grow={1} sx={{ margin: '1rem' }}>
+            <Outlet />
+          </Flex>
+        </Flex>
+      ) : (
+        <Flex direction="inline" grow={1}>
+          <Tabs orientation="vertical" value={tab} onChange={handleChange} sx={{ minWidth: 'fit-content' }}>
+            {Contents}
+          </Tabs>
+          <Divider flexItem orientation="vertical" />
+          <Flex grow={1} sx={{ margin: '2rem' }}>
+            <Outlet />
+          </Flex>
+        </Flex>
+      )}
+    </Flex>
   )
 }
 

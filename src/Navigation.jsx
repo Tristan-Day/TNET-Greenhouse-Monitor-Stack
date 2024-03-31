@@ -24,6 +24,7 @@ import {
   ChevronLeft
 } from '@mui/icons-material'
 
+import { Flex } from './subpage/component'
 import { MonitoringIcon } from './subpage/component/icon/MonitoringIcon'
 
 const DrawerProps = {
@@ -63,16 +64,18 @@ function Titlebar({ window, setDrawerOpen }) {
         >
           <MenuOutlined />
         </IconButton>
-        <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+
+        <Flex sx={{ gap: '1rem', alignItems: 'center' }}>
           <MonitoringIcon size={30} />
           <Typography variant="h6">{window.title}</Typography>
-        </Box>
+        </Flex>
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box>
+        <Flex sx={{ gap: '1rem', alignItems: 'center' }}>
           <Typography variant="h7">{window.message}</Typography>
-        </Box>
+        </Flex>
+
         <IconButton
           sx={{ marginLeft: '1.2rem' }}
           onClick={() => {
@@ -96,7 +99,7 @@ export function Navigation() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <Flex direction="column" sx={{ height: '100vh' }}>
       <Titlebar window={window} setDrawerOpen={setDrawerOpen} />
 
       <Drawer {...DrawerProps} open={drawerOpen}>
@@ -132,6 +135,6 @@ export function Navigation() {
       <WindowContext.Provider value={{ window: window, setWindow: setWindow }}>
         <Outlet />
       </WindowContext.Provider>
-    </Box>
+    </Flex>
   )
 }
