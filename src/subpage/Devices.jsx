@@ -14,21 +14,16 @@ import {
 } from '@mui/material'
 import { Add } from '@mui/icons-material'
 
+import { Flex } from './component'
 import { MonitoringIcon } from './component/icon/MonitoringIcon'
 import { DeviceContext } from '../App'
-
-const CardProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: '1rem',
-  padding: '1rem'
-}
 
 function DeviceRegistration({ dialogState }) {
   const [form, setForm] = useState({})
   const [message, setMessage] = useState()
 
-  const handleValidation = () => {
+  const handleValidation = () => 
+  {
     if (!form.identifier) {
       setMessage({ severity: 'warning', text: 'Enter a Device ID' })
       return
@@ -66,7 +61,17 @@ function DeviceRegistration({ dialogState }) {
 
   return (
     <Backdrop open={dialogState.open}>
-      <Card sx={{ display: 'flex', flexGrow: 1, flexDirection: 'column', gap: '1.2rem', padding: '1.5rem', minWidth: 'fit-content', maxWidth: '50vw' }}>
+      <Card
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          gap: '1.2rem',
+          padding: '1.5rem',
+          minWidth: 'fit-content',
+          maxWidth: '50vw'
+        }}
+      >
         <Typography variant="h5">Register a Device</Typography>
 
         {message && (
@@ -96,13 +101,7 @@ function DeviceRegistration({ dialogState }) {
           }}
         />
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginTop: '1rem'
-          }}
-        >
+        <Flex sx={{ justifyContent: 'space-between', marginTop: '1rem' }}>
           <Button
             variant="outlined"
             onClick={() => {
@@ -119,32 +118,38 @@ function DeviceRegistration({ dialogState }) {
           >
             Add Device
           </Button>
-        </Box>
+        </Flex>
       </Card>
     </Backdrop>
   )
 }
 
-function DeviceCard({ identifier }) {
+function DeviceCard({ label, identifier }) {
+  label = label ? label : 'Greenhouse Monitor'
+
   return (
-    <Card sx={CardProperties}>
+    <Card
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+        padding: '1rem'
+      }}
+    >
       <MonitoringIcon size={35} />
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="h6" sx={{ userSelect: false }}>
-          Greenhouse Monitor
-        </Typography>
+      <Flex direction="column">
+        <Typography variant="h6">{label}</Typography>
         <Typography variant="p1">{identifier}</Typography>
-      </Box>
+      </Flex>
     </Card>
   )
 }
 
 export default function Devices() {
-  const deviceContext = useContext(DeviceContext)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+    <Flex direction="column" grow={1}>
       <DeviceRegistration
         dialogState={{ open: dialogOpen, set: setDialogOpen }}
       />
@@ -153,19 +158,19 @@ export default function Devices() {
         My Devices
       </Typography>
 
-      {!deviceContext.devices.length && !dialogOpen && (
+      {!useContext(DeviceContext).devices.length && !dialogOpen && (
         <Grow in>
           <Alert severity="info" sx={{ marginBottom: '1.2rem' }}>
-            Click 'Add New Device' to Setup a New Device
+            You Currently have no Registered Devices
           </Alert>
         </Grow>
       )}
 
-      <Box sx={{ display: 'flex', gap: '1rem' }}>
-        {deviceContext.devices.map(device => (
+      <Flex sx={{ gap: '1rem' }}>
+        {useContext(DeviceContext).devices.map(device => (
           <DeviceCard key={device.identifier} identifier={device.identifier} />
         ))}
-      </Box>
+      </Flex>
 
       <Box sx={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem' }}>
         <Fab
@@ -178,6 +183,6 @@ export default function Devices() {
           <Add />
         </Fab>
       </Box>
-    </Box>
+    </Flex>
   )
 }

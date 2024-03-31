@@ -1,4 +1,6 @@
-import { Box, Typography, Link, Card, Divider } from '@mui/material'
+import { Typography, Link, Card, Divider } from '@mui/material'
+
+import { Flex } from './component'
 import { MonitoringIcon } from './component/icon/MonitoringIcon'
 
 export default function Legal() {
@@ -10,13 +12,13 @@ export default function Legal() {
         TNET - Greenhouse Monitoring Services
       </Typography>
 
-      <Typography sx={{ textAlign: 'center' }}>
+      <Typography textAlign="center">
         Licenced Under the GNU General Public Licence - Copyright Tristan Day (2024)
       </Typography>
 
       <Divider flexItem sx={{ margin: '2rem 0 2rem 0' }} />
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <Flex direction='column' sx={{ gap: '1rem' }}>
         <Typography>
           The licenses for most software and other practical works are designed
           to take away your freedom to share and change the works. By contrast,
@@ -848,7 +850,7 @@ export default function Legal() {
           please read{' '}
           <Link>https://www.gnu.org/licenses/why-not-lgpl.html</Link>.
         </Typography>
-      </Box>
+      </Flex>
     </Card>
   )
 }
