@@ -29,7 +29,6 @@ function App() {
     getUserData()
       .then(result => {
         setAccount(result)
-        console.log(result)
       })
       .catch(error => {
         console.log(error.message)
@@ -43,8 +42,8 @@ function App() {
           <CssBaseline>
             <Routes>
               <Route path="*" element={<Navigation />}>
+                <Route path=":device" element={<Dashboard />} />
                 {SettingsRoutes()}
-                <Route index path="*" element={<Dashboard />} />
               </Route>
             </Routes>
           </CssBaseline>
