@@ -166,7 +166,7 @@ export default function Devices() {
         My Devices
       </Typography>
 
-      {!accountContext.DEVICES.length && !dialog && (
+      {accountContext.DEVICES && !accountContext.DEVICES.length && !dialog && (
         <Grow in>
           <Alert severity="info" sx={{ marginBottom: '1.2rem' }}>
             You Currently have no Registered Devices
@@ -175,7 +175,7 @@ export default function Devices() {
       )}
 
       <Flex sx={{ gap: '1rem' }}>
-        {accountContext.DEVICES.map(device => (
+        {accountContext.DEVICES && accountContext.DEVICES.map(device => (
           <DeviceCard key={device} identifier={device} />
         ))}
       </Flex>

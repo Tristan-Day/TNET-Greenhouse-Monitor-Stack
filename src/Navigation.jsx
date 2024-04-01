@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react'
+import { createContext, useState, useContext } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 import { signOut } from 'aws-amplify/auth'
@@ -14,18 +14,22 @@ import {
   IconButton,
   ListItemText,
   Divider,
-  Drawer
+  Drawer,
+  List,
+  ListItem
 } from '@mui/material'
 
 import {
   MenuOutlined,
   SettingsOutlined,
   LogoutOutlined,
-  ChevronLeft
+  ChevronLeft,
+  DevicesOutlined
 } from '@mui/icons-material'
 
 import { Flex } from './subpage/component'
 import { MonitoringIcon } from './subpage/component/icon/MonitoringIcon'
+import { AccountContext } from './App'
 
 const DrawerProps = {
   variant: 'persistent',
@@ -92,8 +96,12 @@ function Titlebar({ window, setDrawer }) {
 }
 
 export function Navigation() {
+  const accountContext = useContext(AccountContext)
+
   const [window, setWindow] = useState({ title: 'Greenhouse Monitor' })
   const [drawer, setDrawer] = useState(false)
+
+  const navigate = useNavigate()
 
   return (
     <Flex direction="column" sx={{ height: '100vh' }}>
@@ -113,6 +121,27 @@ export function Navigation() {
           </IconButton>
         </DrawerHeader>
         <Divider />
+
+        {accountContext.DEVICES && (
+          <List>
+            {accountContext.DEVICES.map(device => {
+              return (
+                <ListItem key={device} disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      navigate(device)
+                    }}
+                  >
+                    <ListItemIcon>
+                      <DevicesOutlined />
+                    </ListItemIcon>
+                    <ListItemText>{device.substring(0, 23)}...</ListItemText>
+                  </ListItemButton>
+                </ListItem>
+              )
+            })}
+          </List>
+        )}
 
         <Box sx={{ flexGrow: '30' }} />
 

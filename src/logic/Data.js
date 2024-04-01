@@ -1,18 +1,18 @@
-import { getCurrentUser } from 'aws-amplify/auth'
 import { get } from 'aws-amplify/api'
 
 export const getData = async (device, period) => {
   const operation = get({
     apiName: 'GreenhouseMonitorDataHandler',
-    path: `/data/${device}`
+    path: `/data/${device}`,
+    options: {
+      body: { range: period }
+    }
   })
 
   var response
   try {
     response = await operation.response
   } catch (error) {
-    console.log(error)
-
     throw new Error('Failed to perform DynamoDB operation')
   }
 
