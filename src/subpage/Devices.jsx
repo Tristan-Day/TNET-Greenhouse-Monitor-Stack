@@ -16,14 +16,16 @@ import { Add } from '@mui/icons-material'
 
 import { Flex } from './component'
 import { MonitoringIcon } from './component/icon/MonitoringIcon'
-import { DeviceContext } from '../App'
+
+import { registerDevice } from '../logic/User'
+import { AccountContext } from '../App'
 
 function DeviceRegistration({ dialogState }) {
   const [form, setForm] = useState({})
   const [message, setMessage] = useState()
 
-  const handleValidation = () => 
-  {
+  const handleValidation = () => {
+    // Validate the form and display an appropriate message
     if (!form.identifier) {
       setMessage({ severity: 'warning', text: 'Enter a Device ID' })
       return
@@ -48,7 +50,16 @@ function DeviceRegistration({ dialogState }) {
   }
 
   const handleSubmit = () => {
-    setMessage({ severity: 'info', text: 'Registering your Device' })
+    // Submit the form and handle any errors
+    setMessage({ severity: 'info', text: 'Registering your Device'})
+
+    registerDevice(form.identifier, form.code)
+      .then(() => {
+        setMessage({severity: 'success', text: 'Device Registered' })
+      })
+      .catch(error => {
+        setMessage({ severity: 'error', text: error.message })
+      })
   }
 
   useEffect(() => {
@@ -142,19 +153,20 @@ function DeviceCard({ label, identifier }) {
 }
 
 export default function Devices() {
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const accountContext = useContext(AccountContext)
+  const [dialog, setDialog] = useState(false)
 
   return (
     <Flex direction="column" grow={1}>
       <DeviceRegistration
-        dialogState={{ open: dialogOpen, set: setDialogOpen }}
+        dialogState={{ open: dialog, set: setDialog }}
       />
 
       <Typography variant="h4" marginBottom="0.75rem">
         My Devices
       </Typography>
 
-      {!useContext(DeviceContext).devices.length && !dialogOpen && (
+      {!accountContext.DEVICES.length && !dialog && (
         <Grow in>
           <Alert severity="info" sx={{ marginBottom: '1.2rem' }}>
             You Currently have no Registered Devices
@@ -163,16 +175,16 @@ export default function Devices() {
       )}
 
       <Flex sx={{ gap: '1rem' }}>
-        {useContext(DeviceContext).devices.map(device => (
-          <DeviceCard key={device.identifier} identifier={device.identifier} />
+        {accountContext.DEVICES.map(device => (
+          <DeviceCard key={device} identifier={device} />
         ))}
       </Flex>
 
       <Box sx={{ position: 'fixed', bottom: '1.5rem', right: '1.5rem' }}>
         <Fab
-          disabled={dialogOpen}
+          disabled={dialog}
           onClick={() => {
-            setDialogOpen(true)
+            setDialog(true)
           }}
           color="primary"
         >

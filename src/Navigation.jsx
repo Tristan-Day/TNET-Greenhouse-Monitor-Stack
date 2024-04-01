@@ -49,7 +49,7 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export const WindowContext = createContext()
 
-function Titlebar({ window, setDrawerOpen }) {
+function Titlebar({ window, setDrawer }) {
   const navigate = useNavigate()
 
   return (
@@ -58,7 +58,7 @@ function Titlebar({ window, setDrawerOpen }) {
         <IconButton
           sx={{ marginRight: '1.2rem' }}
           onClick={() => {
-            setDrawerOpen(true)
+            setDrawer(true)
           }}
           color="inherit"
         >
@@ -79,7 +79,7 @@ function Titlebar({ window, setDrawerOpen }) {
         <IconButton
           sx={{ marginLeft: '1.2rem' }}
           onClick={() => {
-            setDrawerOpen(false)
+            setDrawer(false)
             navigate('settings')
           }}
           color="inherit"
@@ -92,24 +92,21 @@ function Titlebar({ window, setDrawerOpen }) {
 }
 
 export function Navigation() {
-  const [window, setWindow] = useState({
-    title: 'Greenhouse Monitor'
-  })
-
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [window, setWindow] = useState({ title: 'Greenhouse Monitor' })
+  const [drawer, setDrawer] = useState(false)
 
   return (
     <Flex direction="column" sx={{ height: '100vh' }}>
-      <Titlebar window={window} setDrawerOpen={setDrawerOpen} />
+      <Titlebar window={window} setDrawer={setDrawer} />
 
-      <Drawer {...DrawerProps} open={drawerOpen}>
+      <Drawer {...DrawerProps} open={drawer}>
         <DrawerHeader>
           <Typography variant="h6" marginLeft="1rem">
             Greenhouse Monitor
           </Typography>
           <IconButton
             onClick={() => {
-              setDrawerOpen(false)
+              setDrawer(false)
             }}
           >
             <ChevronLeft />

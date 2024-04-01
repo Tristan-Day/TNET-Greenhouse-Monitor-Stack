@@ -59,12 +59,6 @@ app.get('/user/:identifier', async function(req, res)
         required: true
   } */
 
-  if (getUserIdentifier(req) !== req.params.identifier)
-  {
-    res.status(401)
-    return
-  }
-
   try
   {
     const user = await getUser(req.params.identifier)
@@ -96,12 +90,6 @@ app.put('/user/:identifier/devices', async function(req, res)
         required: true
   } */
 
-  if (getUserIdentifier(req) !== req.params.identifier)
-  {
-    res.status(401)
-    return
-  }
-
   if (!req.body.identifier)
   {
     res.status(400).json({error : 'A device identifier is required'})
@@ -119,12 +107,6 @@ app.put('/user/:identifier/devices', async function(req, res)
     const result = await dynamo.send(new GetCommand(
         {TableName : 'GreenhouseMonitor-Devices', Key : {DEVICE : req.body.identifier}}))
 
-    if (result.Count === 0)
-    {
-      res.status(404).json({error : 'Invalid device identifier'})
-      return
-    }
-
     if (req.body.code === result.Item.code)
     {
       res.status(403).json({error : 'Invalid activation code'})
@@ -133,7 +115,7 @@ app.put('/user/:identifier/devices', async function(req, res)
   }
   catch
   {
-    res.status(500).json({error : 'Error executing device lookup'})
+    res.status(404).json({error : 'Device not found'})
     return
   }
 
@@ -142,8 +124,6 @@ app.put('/user/:identifier/devices', async function(req, res)
   try
   {
     user = await getUser(req.params.identifier)
-
-    console.log(user)
 
     // Check if the device is already registered
     if (user.DEVICES && user.DEVICES.includes(req.body.identifier))
