@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CssBaseline } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
+import { getUserData } from './logic/User'
 import { Navigation } from './Navigation'
 import Dashboard from './Dashboard'
 
@@ -19,19 +20,24 @@ if (
   theme = 'dark'
 }
 
-export const DeviceContext = createContext({ devices: [] })
+export const AccountContext = createContext({})
 
 function App() {
-  const [devices, setDevices] = useState({
-    devices: []
-  })
+  const [account, setAccount] = useState({})
 
   useEffect(() => {
-    // Code to retreive the list of registered devices
+    getUserData()
+      .then(result => {
+        setAccount(result)
+        console.log(result)
+      })
+      .catch(error => {
+        console.log(error.message)
+      })
   }, [])
 
   return (
-    <DeviceContext.Provider value={devices}>
+    <AccountContext.Provider value={account}>
       <BrowserRouter>
         <ThemeProvider theme={createTheme({ palette: { mode: theme } })}>
           <CssBaseline>
@@ -44,7 +50,7 @@ function App() {
           </CssBaseline>
         </ThemeProvider>
       </BrowserRouter>
-    </DeviceContext.Provider>
+    </AccountContext.Provider>
   )
 }
 

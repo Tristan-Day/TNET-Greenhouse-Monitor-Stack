@@ -1,0 +1,9 @@
+{
+  "httpMethod": "PUT",
+  "path": "/user/3f7a46a9-f685-4e3d-bff0-c3eb81eda662/devices",
+  "queryStringParameters": {},
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": "{\"identifier\": \"0bcc878f-61a3-4a15-8d57-b199c4ea3bc5\", \"code\": 1892}"
+}

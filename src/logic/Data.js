@@ -3,7 +3,7 @@ import { get } from 'aws-amplify/api'
 
 export const getData = async (device, period) => {
   const operation = get({
-    apiName: 'DataHandler',
+    apiName: 'GreenhouseMonitorDataHandler',
     path: `/data/${device}`
   })
 

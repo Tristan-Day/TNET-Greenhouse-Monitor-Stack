@@ -14,10 +14,12 @@ import { DeviceHub, InfoRounded } from '@mui/icons-material'
 
 import { Flex } from './component'
 import { AccountIcon } from './component/icon/AccountIcon'
-import { WindowContext } from '../Navigation'
 
 import Devices from './Devices'
 import Legal from './Legal'
+
+import { AccountContext } from '../App'
+import { WindowContext } from '../Navigation'
 
 const SettingsContents = [
   { name: 'Devices', icon: <DeviceHub />, URL: 'devices' },
@@ -25,6 +27,7 @@ const SettingsContents = [
 ]
 
 function Header() {
+  const accountContext = useContext(AccountContext)
   const navigate = useNavigate()
 
   return (
@@ -32,16 +35,11 @@ function Header() {
       <Flex sx={{ marginRight: 'auto', gap: '1rem' }}>
         <AccountIcon fill={useTheme().palette.text.primary} size={60} />
         <Box>
-          <Typography variant="h6">Username</Typography>
-          <Typography variant="h8">email@example.co.uk</Typography>
+          <Typography variant="h6">{accountContext.NAME}</Typography>
+          <Typography variant="h8">{accountContext.EMAIL}</Typography>
         </Box>
       </Flex>
-      <Button
-        variant="outlined"
-        onClick={() => {
-          navigate('/')
-        }}
-      >
+      <Button variant="outlined" onClick={() => {navigate('/')}}>
         Return
       </Button>
     </Flex>
