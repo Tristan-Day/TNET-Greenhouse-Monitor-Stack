@@ -52,4 +52,4 @@ Then run the application using
 
 `npm start`
 
-This will run the application in the development mode.\
+This will run the application in the development mode.
