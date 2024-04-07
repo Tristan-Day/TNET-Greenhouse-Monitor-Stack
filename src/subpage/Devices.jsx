@@ -14,8 +14,8 @@ import {
 } from '@mui/material'
 import { Add } from '@mui/icons-material'
 
-import { Flex } from './component'
-import { MonitoringIcon } from './component/icon/MonitoringIcon'
+import { Flex } from '../component'
+import { MonitoringIcon } from '../component/icon/MonitoringIcon'
 
 import { registerDevice } from '../logic/User'
 import { AccountContext } from '../App'
@@ -86,7 +86,6 @@ function DeviceRegistration({ dialogState }) {
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-
         <Divider sx={{ marginBottom: '0.8rem' }} />
 
         <TextField
@@ -109,12 +108,7 @@ function DeviceRegistration({ dialogState }) {
         />
 
         <Flex sx={{ justifyContent: 'space-between', marginTop: '1rem' }}>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              dialogState.set(false)
-            }}
-          >
+          <Button variant="outlined" onClick={() => dialogState.set(false)}>
             Cancel
           </Button>
           <Button
@@ -158,11 +152,9 @@ export default function Devices() {
 
   return (
     <Flex direction="column" grow={1}>
-      <DeviceRegistration
-        dialogState={{ open: dialog, set: setDialog }}
-      />
+      <DeviceRegistration dialogState={{ open: dialog, set: setDialog }} />
 
-      <Typography variant="h4" marginBottom="0.75rem">
+      <Typography variant="h4" marginBottom="1rem">
         My Devices
       </Typography>
 

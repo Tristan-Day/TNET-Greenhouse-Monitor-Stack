@@ -1,7 +1,7 @@
 import { Typography, Link, Card, Divider } from '@mui/material'
 
-import { Flex } from './component'
-import { MonitoringIcon } from './component/icon/MonitoringIcon'
+import { Flex } from '../component'
+import { MonitoringIcon } from '../component/icon/MonitoringIcon'
 
 export default function Legal() {
   return (
