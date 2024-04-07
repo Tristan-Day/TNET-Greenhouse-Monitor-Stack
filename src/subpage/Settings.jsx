@@ -12,8 +12,8 @@ import {
 } from '@mui/material'
 import { DeviceHub, InfoRounded } from '@mui/icons-material'
 
-import { Flex } from './component'
-import { AccountIcon } from './component/icon/AccountIcon'
+import { Flex } from '../component'
+import { AccountIcon } from '../component/icon/AccountIcon'
 
 import Devices from './Devices'
 import Legal from './Legal'
@@ -30,16 +30,39 @@ function Header() {
   const accountContext = useContext(AccountContext)
   const navigate = useNavigate()
 
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+  const theme = useTheme()
+
   return (
     <Flex sx={{ margin: '1.2rem 1rem 1.2rem 1rem' }}>
       <Flex sx={{ marginRight: 'auto', gap: '1rem' }}>
-        <AccountIcon fill={useTheme().palette.text.primary} size={60} />
-        <Box>
-          <Typography variant="h6">{accountContext.NAME}</Typography>
-          <Typography variant="h8">{accountContext.EMAIL}</Typography>
-        </Box>
+        {!isMobileView && (
+          <AccountIcon fill={theme.palette.text.primary} size={60} />
+        )}
+
+        {isMobileView ? (
+          <Flex sx={{ alignItems: 'center' }}>
+            <Box sx={{ width: '50vw' }}>
+              <Typography variant="h6">{accountContext.NAME}</Typography>
+              <Typography noWrap>{accountContext.EMAIL}</Typography>
+            </Box>
+          </Flex>
+        ) : (
+          <Flex sx={{ alignItems: 'center' }}>
+            <Box>
+              <Typography variant="h6">{accountContext.NAME}</Typography>
+              <Typography>{accountContext.EMAIL}</Typography>
+            </Box>
+          </Flex>
+        )}
       </Flex>
-      <Button variant="outlined" onClick={() => {navigate('/')}}>
+
+      <Button
+        variant="outlined"
+        onClick={() => {
+          navigate('/')
+        }}
+      >
         Return
       </Button>
     </Flex>

@@ -27,8 +27,8 @@ import {
   DevicesOutlined
 } from '@mui/icons-material'
 
-import { Flex } from './subpage/component'
-import { MonitoringIcon } from './subpage/component/icon/MonitoringIcon'
+import { Flex } from './component'
+import { MonitoringIcon } from './component/icon/MonitoringIcon'
 import { AccountContext } from './App'
 
 const DrawerProps = {
@@ -129,6 +129,7 @@ export function Navigation() {
                 <ListItem key={device} disablePadding>
                   <ListItemButton
                     onClick={() => {
+                      setDrawer(false)
                       navigate(device)
                     }}
                   >

@@ -43,6 +43,7 @@ function App() {
             <Routes>
               <Route path="*" element={<Navigation />}>
                 <Route path=":device" element={<Dashboard />} />
+                <Route index element={<Dashboard />} />
                 {SettingsRoutes()}
               </Route>
             </Routes>
