@@ -19,7 +19,9 @@ import { TransmitterIcon } from './component/icon/TransmitterIcon'
 
 import { WindowContext } from './Navigation'
 import { AccountContext } from './App'
+
 import { getWeatherData } from './logic/Data'
+import { isValidPostcode } from './logic/Validation'
 
 function DeviceLocation({ device, dialogState }) {
   const [postcode, setPostcode] = useState('')
@@ -31,7 +33,7 @@ function DeviceLocation({ device, dialogState }) {
       return
     }
 
-    if (!postcode.match(/^([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([AZa-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z])))) [0-9][A-Za-z]{2})$/gm)) {
+    if (!isValidPostcode(postcode)) {
       setMessage({ severity: 'error', text: 'Please enter a valid postcode' })
       return
     }
@@ -151,6 +153,7 @@ function Header({ device, dialogState }) {
           </Flex>
         )}
       </Flex>
+
       <Button
         variant="outlined"
         onClick={() => {
@@ -180,32 +183,37 @@ function Dashboard() {
 
   useEffect(() => {
     windowContext.setWindow({ title: `Greenhouse Monitor` })
+  }, [])
+
+  useEffect(() => {
     setDevice({
       ID: identifier,
       ...JSON.parse(localStorage.getItem(identifier))
     })
-  }, [])
+  }, [identifier])
 
   useEffect(() => {
-    if (device && device.location) {
-      getWeatherData(device.location.lat, device.location.lon)
-        .then(async response => {
-          if (response.ok) {
-            setWeather(await response.json())
-          } else {
-            setMessage({
-              severity: 'error',
-              text: 'Failed to retreive weather data'
-            })
-          }
-        })
-        .catch(() => {
+    if (!device || !device.location) {
+      return
+    }
+
+    getWeatherData(device.location.lat, device.location.lon)
+      .then(async response => {
+        if (response.ok) {
+          setWeather(await response.json())
+        } else {
           setMessage({
             severity: 'error',
             text: 'Failed to retreive weather data'
           })
+        }
+      })
+      .catch(() => {
+        setMessage({
+          severity: 'error',
+          text: 'Failed to retreive weather data'
         })
-    }
+      })
   }, [device])
 
   return (
