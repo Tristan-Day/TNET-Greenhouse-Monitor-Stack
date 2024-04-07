@@ -5,6 +5,7 @@ import { Amplify } from 'aws-amplify'
 import '@aws-amplify/ui-react/styles.css'
 import { Authenticator } from '@aws-amplify/ui-react'
 
+import './App.css'
 import App from './App'
 
 import awsExports from './aws-exports'

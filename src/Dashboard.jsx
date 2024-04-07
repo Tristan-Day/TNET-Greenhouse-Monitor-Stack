@@ -80,17 +80,7 @@ function DeviceLocation({ device, dialogState }) {
 
   return (
     <Backdrop open={dialogState.open}>
-      <Card
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-          gap: '1.2rem',
-          padding: '1.5rem',
-          minWidth: 'fit-content',
-          maxWidth: '50vw'
-        }}
-      >
+      <Card className='Popup'>
         <Typography variant="h5">Set Device Location</Typography>
 
         {message && (
