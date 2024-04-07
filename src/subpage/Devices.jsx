@@ -70,17 +70,7 @@ function DeviceRegistration({ dialogState }) {
 
   return (
     <Backdrop open={dialogState.open}>
-      <Card
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          flexGrow: 1,
-          gap: '1.2rem',
-          padding: '1.5rem',
-          minWidth: 'fit-content',
-          maxWidth: '50vw'
-        }}
-      >
+      <Card className='Popup'>
         <Typography variant="h5">Register a Device</Typography>
 
         {message && (
@@ -131,14 +121,7 @@ function DeviceCard({ label, identifier }) {
   label = label ? label : 'Greenhouse Monitor'
 
   return (
-    <Card
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        padding: '1rem'
-      }}
-    >
+    <Card className='Card'>
       <MonitoringIcon size={35} />
       <Flex direction="column">
         <Typography variant="h6">{label}</Typography>

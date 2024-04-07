@@ -7,10 +7,10 @@ import { CssBaseline } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
 import { getUserData } from './logic/User'
-import { Navigation } from './Navigation'
-import Dashboard from './Dashboard'
 
+import { Navigation } from './Navigation'
 import SettingsRoutes from './subpage/Settings'
+import Dashboard from './Dashboard'
 
 let theme = 'light'
 if (
