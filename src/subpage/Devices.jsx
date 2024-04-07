@@ -17,7 +17,9 @@ import { Add } from '@mui/icons-material'
 import { Flex } from '../component'
 import { MonitoringIcon } from '../component/icon/MonitoringIcon'
 
+import { isValidIdentifier } from '../logic/Validation'
 import { registerDevice } from '../logic/User'
+
 import { AccountContext } from '../App'
 
 function DeviceRegistration({ dialogState }) {
@@ -31,7 +33,7 @@ function DeviceRegistration({ dialogState }) {
       return
     }
 
-    if (!form.identifier.match(/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+    if (!isValidIdentifier(form.identifier)) {
       setMessage({ severity: 'error', text: 'Device ID is Not Valid' })
       return
     }
