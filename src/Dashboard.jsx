@@ -38,7 +38,7 @@ function DeviceLocation({ device, dialogState }) {
 
     setMessage({ severity: 'info', text: 'Checking postcode', loading: true })
 
-    fetch(`http://api.postcodes.io/postcodes/${postcode}`)
+    fetch(`https://api.postcodes.io/postcodes/${postcode}`)
       .then(async response => {
         setMessage({
           severity: 'success',
@@ -173,7 +173,7 @@ function Dashboard() {
   }
 
   const [dialog, setDialog] = useState(false)
-  const [message, setMessage] = useState()
+  const [message, setMessage] = useState(false)
 
   const [weather, setWeather] = useState({})
   const [device, setDevice] = useState({})
