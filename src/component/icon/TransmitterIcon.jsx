@@ -1,4 +1,5 @@
-export function TransmitterIcon({ fill, size }) {
+export function TransmitterIcon({ fill, size }) 
+{
   return (
     <div style={{ width: `${size}px`, height: `${size}px`, overflow: 'hidden' }}>
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">

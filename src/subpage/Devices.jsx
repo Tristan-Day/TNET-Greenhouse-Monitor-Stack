@@ -22,7 +22,8 @@ import { registerDevice } from '../logic/User'
 
 import { AccountContext } from '../App'
 
-function DeviceRegistration({ dialogState }) {
+function RegistrationDialog({ dialogState }) 
+{
   const [form, setForm] = useState({})
   const [message, setMessage] = useState()
 
@@ -117,7 +118,8 @@ function DeviceRegistration({ dialogState }) {
   )
 }
 
-function DeviceCard({ label, identifier }) {
+function DeviceCard({ label, identifier }) 
+{
   label = label ? label : 'Greenhouse Monitor'
 
   return (
@@ -125,19 +127,20 @@ function DeviceCard({ label, identifier }) {
       <MonitoringIcon size={35} />
       <Flex direction="column">
         <Typography variant="h6">{label}</Typography>
-        <Typography variant="p1">{identifier}</Typography>
+        <Typography>{identifier}</Typography>
       </Flex>
     </Card>
   )
 }
 
-export default function Devices() {
+export default function Devices() 
+{
   const accountContext = useContext(AccountContext)
   const [dialog, setDialog] = useState(false)
 
   return (
     <Flex direction="column" grow={1}>
-      <DeviceRegistration dialogState={{ open: dialog, set: setDialog }} />
+      <RegistrationDialog dialogState={{ open: dialog, set: setDialog }} />
 
       <Typography variant="h4" marginBottom="1rem">
         My Devices

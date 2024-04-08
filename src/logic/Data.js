@@ -1,15 +1,17 @@
-import { get } from 'aws-amplify/api'
+import {get} from 'aws-amplify/api'
 
-export const getWeatherData = async (latitude, longitude) => {
+export const getWeatherData =
+    async (latitude, longitude) => {
   let URL = "https://api.open-meteo.com/v1/forecast?"
 
   URL += `latitude=${latitude}&longitude=${longitude}`
   URL += "&temperature_2m,relative_humidity_2m&hourly=temperature_2m,relative_humidity_2m"
 
-  const convert = number => {
-    const string = String(number)
-    return string.padStart(2, '0')
-  }
+  const convert =
+      number => {
+        const string = String(number)
+        return string.padStart(2, '0')
+      }
 
   let date = new Date()
   const end = `${date.getFullYear()}-${convert(date.getMonth())}-${convert(
@@ -27,21 +29,28 @@ export const getWeatherData = async (latitude, longitude) => {
   return fetch(URL)
 }
 
+function getResponseCode(error) {
+  return error.$metadata.httpStatusCode
+}
 
 export const getMonitoringData = async (device, period) => {
-  const operation = get({
-    apiName: 'GreenhouseMonitorDataHandler',
-    path: `/data/${device}`,
-    options: {
-      body: { range: period }
-    }
-  })
+  const operation = get({apiName : 'GreenhouseMonitorDataHandler', path : `/data/${device}`})
 
   var response
-  try {
+  try
+  {
     response = await operation.response
-  } catch (error) {
-    throw new Error('Failed to perform DynamoDB operation')
+  }
+  catch (error)
+  {
+    switch (getResponseCode(error))
+    {
+    case 500:
+      throw new Error('No data available, please ensure your device is charged')
+
+    default: 
+      throw new Error('Failed to retreive monitoring data, please try again later')
+    }
   }
 
   return (await response.body.json()).Items

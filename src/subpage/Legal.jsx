@@ -3,7 +3,8 @@ import { Typography, Link, Card, Divider } from '@mui/material'
 import { Flex } from '../component'
 import { MonitoringIcon } from '../component/icon/MonitoringIcon'
 
-export default function Legal() {
+export default function Legal() 
+{
   return (
     <Card sx={{ display: 'flex', flexDirection: 'column', margin: '3vw', padding: '4vw', alignItems: 'center' }}>
       <MonitoringIcon size={100} />

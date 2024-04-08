@@ -22,7 +22,8 @@ if (
 
 export const AccountContext = createContext({})
 
-function App() {
+function App() 
+{
   const [account, setAccount] = useState({})
 
   useEffect(() => {
