@@ -21,12 +21,14 @@ import Legal from './Legal'
 import { AccountContext } from '../App'
 import { WindowContext } from '../Navigation'
 
-const SettingsContents = [
+const SettingsContents = 
+[
   { name: 'Devices', icon: <DeviceHub />, URL: 'devices' },
   { name: 'Legal', icon: <InfoRounded />, URL: 'legal' }
 ]
 
-function Header() {
+function Header() 
+{
   const accountContext = useContext(AccountContext)
   const navigate = useNavigate()
 
@@ -69,7 +71,8 @@ function Header() {
   )
 }
 
-function Settings() {
+function Settings() 
+{
   const windowContext = useContext(WindowContext)
   const [tab, setTab] = useState(0)
 
@@ -120,7 +123,8 @@ function Settings() {
   )
 }
 
-export default function SettingsRoutes() {
+export default function SettingsRoutes() 
+{
   return (
     <Route path="settings" element={<Settings />}>
       <Route path="*" element={<Devices />} />

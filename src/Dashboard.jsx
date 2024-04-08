@@ -1,5 +1,6 @@
 import { useEffect, useContext, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { strftime } from 'strftime'
 
 import {
   Box,
@@ -14,16 +15,19 @@ import {
   useTheme
 } from '@mui/material'
 
+import { LineChart } from '@mui/x-charts'
+
 import { Flex } from './component'
 import { TransmitterIcon } from './component/icon/TransmitterIcon'
 
 import { WindowContext } from './Navigation'
 import { AccountContext } from './App'
 
-import { getWeatherData } from './logic/Data'
+import { getMonitoringData, getWeatherData } from './logic/Data'
 import { isValidPostcode } from './logic/Validation'
 
-function DeviceLocation({ device, dialogState }) {
+function LocationDialog({ device, dialogState })
+{
   const [postcode, setPostcode] = useState('')
   const [message, setMessage] = useState()
 
@@ -74,14 +78,18 @@ function DeviceLocation({ device, dialogState }) {
   useEffect(() => {
     setMessage({
       severity: 'info',
-      text: 'Setting a location enables weather integrations'
+      text: 'This will enable weather integrations'
     })
   }, [])
 
   return (
     <Backdrop open={dialogState.open}>
-      <Card className='Popup'>
-        <Typography variant="h5">Set Device Location</Typography>
+      <Card className="Popup">
+        {device.location ? (
+          <Typography variant="h5">Update Device Location</Typography>
+        ) : (
+          <Typography variant="h5">Set Device Location</Typography>
+        )}
 
         {message && (
           <Grow in>
@@ -101,7 +109,10 @@ function DeviceLocation({ device, dialogState }) {
         />
 
         <Flex sx={{ justifyContent: 'space-between', marginTop: '1rem' }}>
-          <Button variant="outlined" onClick={() => dialogState.set(false)}>
+          <Button
+            variant={message && !message.loading ? 'outlined' : 'disabled'}
+            onClick={() => dialogState.set(false)}
+          >
             Close
           </Button>
           <Button
@@ -116,7 +127,8 @@ function DeviceLocation({ device, dialogState }) {
   )
 }
 
-function Header({ device, dialogState }) {
+function Header({ device, dialogState })
+{
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
   const theme = useTheme()
 
@@ -131,14 +143,14 @@ function Header({ device, dialogState }) {
           <Flex sx={{ alignItems: 'center' }}>
             <Box sx={{ width: '50vw' }}>
               <Typography variant="h6">Device Dashboard</Typography>
-              <Typography noWrap>{device.ID}</Typography>
+              <Typography noWrap>{device.ID || 'Loading...'}</Typography>
             </Box>
           </Flex>
         ) : (
           <Flex sx={{ alignItems: 'center' }}>
             <Box>
               <Typography variant="h6">Device Dashboard</Typography>
-              <Typography>{device.ID}</Typography>
+              <Typography>{device.ID || 'Loading...'}</Typography>
             </Box>
           </Flex>
         )}
@@ -156,7 +168,51 @@ function Header({ device, dialogState }) {
   )
 }
 
-function Dashboard() {
+function LiveData({ device, weather }) 
+{
+  const SectionContents = 
+  [
+    { name: 'Temperature', units: '°C' },
+    { name: 'Pressure', units: 'Pa' },
+    { name: 'Humidity', units: '%' },
+
+    { name: 'Soil Sensor A' },
+    { name: 'Soil Sensor B' }
+  ]
+
+  const DataCard = ({ name, units, value }) => {
+    return (
+      <Card className="DataCard">
+        <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
+          <Typography variant="h5">{value || '-'}</Typography>
+          {units && value && <Typography variant="caption">{units}</Typography>}
+        </Flex>
+        <Typography>{name}</Typography>
+      </Card>
+    )
+  }
+
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+  const flexDirection = isMobileView ? 'column' : 'row'
+
+  return (
+    <Flex direction={flexDirection} sx={{ gap: '2rem', flexWrap: 'wrap' }}>
+      {SectionContents.map(entry => {
+        return <DataCard key= {entry.name} name={entry.name} units={entry.units} value={20} />
+      })}
+    </Flex>
+  )
+}
+
+function Charts({ device, weather }) 
+{
+  // https://mui.com/x/react-charts/lines/
+
+  return <LineChart />
+}
+
+function Dashboard() 
+{
   const windowContext = useContext(WindowContext)
   const accountContext = useContext(AccountContext)
 
@@ -183,7 +239,42 @@ function Dashboard() {
   }, [identifier])
 
   useEffect(() => {
-    if (!device || !device.location) {
+    if (!device || !identifier) {
+      return
+    }
+
+    if (device.cache && device.cache.timestamp) {
+      if (new Date().getTime() - device.cache.timestamp < 600000) {
+        return
+      }
+
+      const date = new Date(device.cache.timestamp * 1000)
+      const time = strftime('%F at %H:%M', date)
+
+      windowContext.setWindow({
+        ...windowContext,
+        message: `Last Updated: ${time}`
+      })
+    }
+
+    getMonitoringData(device.ID, 600000)
+      .then(result => {
+        setDevice({
+          ...device,
+          cache: {
+            timestamp: new Date().getTime(),
+            data: result
+          }
+        })
+      })
+      .catch(error => {
+        setMessage({
+          severity: 'error',
+          text: error.message
+        })
+      })
+
+    if (!device.location) {
       return
     }
 
@@ -206,18 +297,25 @@ function Dashboard() {
       })
   }, [device])
 
+  useEffect(() => {
+    localStorage.setItem(identifier, JSON.stringify(device))
+  }, [device])
+
   return (
     <Flex direction="column" grow={1}>
-      <DeviceLocation device={device} dialogState={{ open: dialog, set: setDialog }} />
+      <LocationDialog device={device} dialogState={{ open: dialog, set: setDialog }} />
       <Header device={device} dialogState={{ open: dialog, set: setDialog }} />
       <Divider />
 
-      {message && (
-        <Grow in>
-          <Alert severity={message.severity}>{message.text}</Alert>
-        </Grow>
-      )}
-
+      <Flex grow={1} direction="column" sx={{ margin: '2rem', gap: '2rem' }}>
+        {message && (
+          <Grow in>
+            <Alert severity={message.severity}>{message.text}</Alert>
+          </Grow>
+        )}
+        <LiveData />
+        <Divider />
+      </Flex>
     </Flex>
   )
 }

@@ -53,7 +53,8 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export const WindowContext = createContext()
 
-function Titlebar({ window, setDrawer }) {
+function Titlebar({ window, setDrawer }) 
+{
   const navigate = useNavigate()
 
   return (
@@ -95,7 +96,8 @@ function Titlebar({ window, setDrawer }) {
   )
 }
 
-export function Navigation() {
+export function Navigation() 
+{
   const accountContext = useContext(AccountContext)
 
   const [window, setWindow] = useState({ title: 'Greenhouse Monitor' })

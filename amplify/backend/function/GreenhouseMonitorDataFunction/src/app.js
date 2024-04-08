@@ -43,9 +43,9 @@ app.get('/data/:device', async function(req, res)
         required: false
   } */
 
-    // Set the default range
+  // Set the default range
   const CHRONOS_DAY = 1000 * 60 * 60 * 24
-  const  range = req.query.range || CHRONOS_DAY
+  const range = req.query.range || CHRONOS_DAY
 
   const expression = 
   {

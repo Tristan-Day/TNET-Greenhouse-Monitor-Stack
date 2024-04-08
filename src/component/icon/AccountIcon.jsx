@@ -1,4 +1,5 @@
-export function AccountIcon({ fill, size }) {
+export function AccountIcon({ fill, size }) 
+{
   const Style = {
     borderWidth: '2px', borderStyle: 'solid', borderRadius: '50%', borderColor: 'white'
   }
