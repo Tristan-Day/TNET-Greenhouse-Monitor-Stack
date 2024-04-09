@@ -232,6 +232,9 @@ function Dashboard()
   }, [])
 
   useEffect(() => {
+    if (!identifier) {
+      return
+    }
     setDevice({
       ID: identifier,
       ...JSON.parse(localStorage.getItem(identifier))
@@ -239,15 +242,11 @@ function Dashboard()
   }, [identifier])
 
   useEffect(() => {
-    if (!device || !identifier) {
+    if (!device.ID) {
       return
     }
 
     if (device.cache && device.cache.timestamp) {
-      if (new Date().getTime() - device.cache.timestamp < 600000) {
-        return
-      }
-
       const date = new Date(device.cache.timestamp * 1000)
       const time = strftime('%F at %H:%M', date)
 
@@ -255,6 +254,10 @@ function Dashboard()
         ...windowContext,
         message: `Last Updated: ${time}`
       })
+
+      if (new Date().getTime() - device.cache.timestamp < 600000) {
+        return
+      }
     }
 
     getMonitoringData(device.ID, 600000)
