@@ -173,21 +173,21 @@ function LiveData({ device, weather })
   const SectionContents = 
   [
     { name: 'Temperature', units: '°C' },
-    { name: 'Pressure', units: 'Pa' },
-    { name: 'Humidity', units: '%' },
+    { name: 'Pressure',    units: 'Pa' },
+    { name: 'Humidity',    units: '%'  },
 
-    { name: 'Soil Sensor A' },
-    { name: 'Soil Sensor B' }
+    { name: 'Soil Sensor A', attribute: 'SoilMoisturePrimary'   },
+    { name: 'Soil Sensor B', attribute: 'SoilMoistureSecondary' }
   ]
 
-  const DataCard = ({ name, units, value }) => {
+  const DataCard = ({ key, units, value }) => {
     return (
       <Card className="DataCard">
         <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
           <Typography variant="h5">{value || '-'}</Typography>
           {units && value && <Typography variant="caption">{units}</Typography>}
         </Flex>
-        <Typography>{name}</Typography>
+        <Typography>{key}</Typography>
       </Card>
     )
   }
@@ -197,8 +197,12 @@ function LiveData({ device, weather })
 
   return (
     <Flex direction={flexDirection} sx={{ gap: '2rem', flexWrap: 'wrap' }}>
-      {SectionContents.map(entry => {
-        return <DataCard key= {entry.name} name={entry.name} units={entry.units} value={20} />
+      {SectionContents.map(entry => 
+      {
+        const attribute = entry.attribute || entry.name
+        const value = device.packets[0].DATA[attribute]
+
+        return <DataCard key={entry.name} units={entry.units} value={value} />
       })}
     </Flex>
   )
@@ -228,7 +232,7 @@ function Dashboard()
   const [device, setDevice] = useState({})
 
   useEffect(() => {
-    windowContext.setWindow({ title: `Greenhouse Monitor` })
+    windowContext.setWindow({ title: 'Greenhouse Monitor' })
   }, [])
 
   useEffect(() => {
@@ -246,17 +250,19 @@ function Dashboard()
       return
     }
 
-    if (device.cache && device.cache.timestamp) {
-      const date = new Date(device.cache.timestamp * 1000)
-      const time = strftime('%F at %H:%M', date)
+    if (device.timestamp) {
+      const date = new Date(device.timestamp)
+      const time = require('strftime')('%F at %H:%M', date)
 
       windowContext.setWindow({
-        ...windowContext,
-        message: `Last Updated: ${time}`
+        title: 'Greenhouse Monitor',
+        message: `Last Updated  -  ${time}`
       })
 
-      if (new Date().getTime() - device.cache.timestamp < 600000) {
-        return
+      if (new Date().getTime() - device.timestamp < 600000) {
+        if (device.packets) {
+          return
+        }
       }
     }
 
@@ -264,10 +270,8 @@ function Dashboard()
       .then(result => {
         setDevice({
           ...device,
-          cache: {
-            timestamp: new Date().getTime(),
-            data: result
-          }
+          timestamp: new Date().getTime(),
+          packets: result
         })
       })
       .catch(error => {
@@ -301,6 +305,9 @@ function Dashboard()
   }, [device])
 
   useEffect(() => {
+    if (!identifier) {
+      return
+    }
     localStorage.setItem(identifier, JSON.stringify(device))
   }, [device])
 
@@ -316,7 +323,7 @@ function Dashboard()
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-        <LiveData />
+        <LiveData device={device}/>
         <Divider />
       </Flex>
     </Flex>

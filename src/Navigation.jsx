@@ -78,7 +78,7 @@ function Titlebar({ window, setDrawer })
         <Box sx={{ flexGrow: 1 }} />
 
         <Flex sx={{ gap: '1rem', alignItems: 'center' }}>
-          <Typography variant="h7">{window.message}</Typography>
+          <Typography variant="p">{window.message}</Typography>
         </Flex>
 
         <IconButton
