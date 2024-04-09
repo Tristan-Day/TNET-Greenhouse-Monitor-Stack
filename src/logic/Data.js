@@ -40,6 +40,7 @@ export const getMonitoringData = async (device, period) => {
   try
   {
     response = await operation.response
+    return (await response.body.json())
   }
   catch (error)
   {
@@ -52,6 +53,4 @@ export const getMonitoringData = async (device, period) => {
       throw new Error('Failed to retreive monitoring data, please try again later')
     }
   }
-
-  return (await response.body.json()).Items
 }

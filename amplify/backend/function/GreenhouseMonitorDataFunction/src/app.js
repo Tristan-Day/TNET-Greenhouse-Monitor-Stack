@@ -50,20 +50,22 @@ app.get('/data/:device', async function(req, res)
   const expression = 
   {
     TableName:
-      'GreenhouseMonitor-data',
+      'GreenhouseMonitor-Data',
     KeyConditionExpression:
       '#deviceAttribute = :device AND #timestampAttribute BETWEEN :start AND :end',
     ExpressionAttributeNames: 
     {
       '#timestampAttribute': 'TIMESTAMP',
-      '#deviceAttribute': 'DEVICE'
+      '#deviceAttribute': 'DEVICE',
+      '#dataAttribute' : 'DATA'
     },
     ExpressionAttributeValues: 
     {
       ':device': req.params.device,
       ':start': new Date().getTime() - range,
       ':end': new Date().getTime()
-    }
+    },
+    ProjectionExpression: '#timestampAttribute, #dataAttribute'
   }
 
   try
@@ -80,15 +82,16 @@ app.get('/data/:device', async function(req, res)
       // Since the timestamps will never be equal we only perform a single check
       if (parseInt(a.TIMESTAMP) > parseInt(b.TIMESTAMP))
       {
-        return 1
+        return -1
       }
-      return -1
+      return 1
     })
 
     res.status(200).json(result.Items)
   }
-  catch
+  catch (error)
   {
+    console.log(`Error Executing Query: ${error}`)
     res.status(500).json({error : 'Error executing query'})
   }
 })
