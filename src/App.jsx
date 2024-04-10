@@ -36,6 +36,20 @@ function App()
       })
   }, [])
 
+  useEffect(() => {
+    if (!account.DEVICES) {
+      return
+    }
+
+    const location = window.location.href.endsWith('/')
+      ? window.location.href.substring(0, window.location.href.length - 1)
+      : window.location.href
+
+    if (location.split('/').length < 4) {
+      window.location.replace(`${window.location.href}${account.DEVICES[0]}`)
+    }
+  }, [account])
+
   return (
     <AccountContext.Provider value={account}>
       <BrowserRouter>
@@ -43,8 +57,7 @@ function App()
           <CssBaseline>
             <Routes>
               <Route path="*" element={<Navigation />}>
-                <Route path=":device" element={<Dashboard />} />
-                <Route index element={<Dashboard />} />
+                <Route path=":identifier" element={<Dashboard />} />
                 {SettingsRoutes()}
               </Route>
             </Routes>

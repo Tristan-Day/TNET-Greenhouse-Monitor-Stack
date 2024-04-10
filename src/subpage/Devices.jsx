@@ -102,7 +102,7 @@ function RegistrationDialog({ dialogState })
 
         <Flex sx={{ justifyContent: 'space-between', marginTop: '1rem' }}>
           <Button variant="outlined" onClick={() => dialogState.set(false)}>
-            Cancel
+            Close
           </Button>
           <Button
             variant={!message ? 'contained' : 'disabled'}
