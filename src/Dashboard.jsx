@@ -180,14 +180,14 @@ function LiveData({ device, weather })
     { name: 'Soil Sensor B', attribute: 'SoilMoistureSecondary' }
   ]
 
-  const DataCard = ({ key, units, value }) => {
+  const DataCard = ({ name, units, value }) => {
     return (
       <Card className="DataCard">
         <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
           <Typography variant="h5">{value || '-'}</Typography>
           {units && value && <Typography variant="caption">{units}</Typography>}
         </Flex>
-        <Typography>{key}</Typography>
+        <Typography>{name}</Typography>
       </Card>
     )
   }
@@ -200,9 +200,9 @@ function LiveData({ device, weather })
       {SectionContents.map(entry => 
       {
         const attribute = entry.attribute || entry.name
-        const value = device.packets[0].DATA[attribute]
+        const value = device.packets ? device.packets[0].DATA[attribute] : null
 
-        return <DataCard key={entry.name} units={entry.units} value={value} />
+        return <DataCard key={entry.name} name={entry.name} units={entry.units} value={value} />
       })}
     </Flex>
   )
@@ -218,12 +218,7 @@ function Charts({ device, weather })
 function Dashboard() 
 {
   const windowContext = useContext(WindowContext)
-  const accountContext = useContext(AccountContext)
-
   let { identifier } = useParams()
-  if (!identifier && accountContext.DEVICES) {
-    identifier = accountContext.DEVICES[0]
-  }
 
   const [dialog, setDialog] = useState(false)
   const [message, setMessage] = useState(false)
@@ -256,7 +251,7 @@ function Dashboard()
 
       windowContext.setWindow({
         title: 'Greenhouse Monitor',
-        message: `Last Updated  -  ${time}`
+        message: `Last Updated: ${time}`
       })
 
       if (new Date().getTime() - device.timestamp < 600000) {
