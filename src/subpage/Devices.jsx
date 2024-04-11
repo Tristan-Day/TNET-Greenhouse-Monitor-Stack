@@ -154,7 +154,7 @@ export default function Devices()
         </Grow>
       )}
 
-      <Flex sx={{ gap: '1rem' }}>
+      <Flex sx={{ flexWrap: 'wrap', gap: '1rem' }}>
         {accountContext.DEVICES && accountContext.DEVICES.map(device => (
           <DeviceCard key={device} identifier={device} />
         ))}

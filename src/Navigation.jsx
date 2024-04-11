@@ -56,6 +56,7 @@ export const WindowContext = createContext()
 function Titlebar({ window, setDrawer }) 
 {
   const navigate = useNavigate()
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
 
   return (
     <AppBar sx={{ position: 'sticky', top: 0 }}>
@@ -77,9 +78,11 @@ function Titlebar({ window, setDrawer })
 
         <Box sx={{ flexGrow: 1 }} />
 
-        <Flex sx={{ gap: '1rem', alignItems: 'center' }}>
-          <Typography variant="p">{window.message}</Typography>
-        </Flex>
+        {!isMobileView && (
+          <Flex sx={{ gap: '1rem', alignItems: 'center' }}>
+            <Typography variant="p">{window.message}</Typography>
+          </Flex>
+        )}
 
         <IconButton
           sx={{ marginLeft: '1.2rem' }}
