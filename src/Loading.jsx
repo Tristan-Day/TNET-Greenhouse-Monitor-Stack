@@ -1,15 +1,15 @@
-import {
-  Typography,
-  Backdrop,
-  CircularProgress,
-} from '@mui/material'
+import { Typography, Backdrop, CircularProgress } from '@mui/material'
 
 import { Flex } from './component'
 import { MonitoringIcon } from './component/icon/MonitoringIcon'
 
-export default function Loading() {
+export default function Loading() 
+{
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+  const headerSize = isMobileView ? 'h5' : 'h3'
+
   return (
-    <Backdrop open sx={{zIndex: 9999}}>
+    <Backdrop open sx={{ zIndex: 9999 }}>
       <Flex
         direction="column"
         grow={1}
@@ -20,7 +20,9 @@ export default function Loading() {
           sx={{ alignItems: 'center', justifyContent: 'center', gap: '2rem' }}
         >
           <MonitoringIcon size={120} />
-          <Typography variant="h3">Loading Monitoring Data</Typography>
+          <Typography textAlign="center" variant={headerSize}>
+            Loading Monitoring Data
+          </Typography>
         </Flex>
         <CircularProgress />
       </Flex>
