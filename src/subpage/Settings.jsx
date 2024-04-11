@@ -62,7 +62,7 @@ function Header()
       <Button
         variant="outlined"
         onClick={() => {
-          navigate('/')
+          navigate(`/${accountContext.DEVICES[0]}`)
         }}
       >
         Return
