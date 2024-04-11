@@ -10,7 +10,9 @@ import { getUserData } from './logic/User'
 
 import { Navigation } from './Navigation'
 import SettingsRoutes from './subpage/Settings'
+
 import Dashboard from './Dashboard'
+import Loading from './Loading'
 
 let theme = 'light'
 if (
@@ -57,6 +59,7 @@ function App()
           <CssBaseline>
             <Routes>
               <Route path="*" element={<Navigation />}>
+                <Route index element={<Loading />}/>
                 <Route path=":identifier" element={<Dashboard />} />
                 {SettingsRoutes()}
               </Route>
