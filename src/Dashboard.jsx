@@ -238,15 +238,11 @@ function ChartData({ device, weather })
   ]
 
   const ChartCard = ({ dataset, name, units, attribute, factor }) => {
-    const width = viewport.width > 550 ? 550 : viewport.width * 0.9
-    const height = width * 0.5
-
     const label = units ? `${name} - ${units}` : name
-    const data = extractDataset(dataset, attribute || name, width * 0.025, factor)
+    const data = extractDataset(dataset, attribute || name, viewport.width * 0.025, factor)
 
     return (
       <LineChart
-        width={width}
         xAxis={[
           {
             dataKey: 'timestamp',
@@ -255,7 +251,6 @@ function ChartData({ device, weather })
             }
           }
         ]}
-        height={height}
         series={[{ dataKey: 'value', label: label }]}
         dataset={data}
       />
@@ -302,7 +297,8 @@ function ChartData({ device, weather })
   )
 }
 
-function Dashboard() {
+function Dashboard()
+{
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 

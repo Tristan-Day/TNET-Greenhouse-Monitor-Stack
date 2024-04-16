@@ -32,12 +32,26 @@
     align-items: center;
 
     flex-direction: column;
+    flex-grow: 1;
 
     gap: 1rem;
-    padding: 1rem;
+    padding: 0.5rem;
+    height: 300px;
 
     min-width: fit-content;
     min-height: fit-content;
+}
+
+@media (min-width: 0px) and (max-width: 700px) {
+    .ChartCard {
+        width: 90vh;
+    }
+}
+
+@media (min-width: 701px) {
+    .ChartCard {
+        width: 700px;
+    }
 }
 
 .Popup {
