@@ -54,3 +54,28 @@ export const getMonitoringData = async (device, period) => {
     }
   }
 }
+
+export const extractDataset = (packets, attribute, length, factor) => {
+  let datapoints = packets.map(packet => {
+    return {
+      timestamp: packet.TIMESTAMP,
+      value: parseFloat(packet.DATA[attribute])
+    }
+  })
+
+  if (factor) 
+  {
+    datapoints = datapoints.map(datapoint => {
+      return {
+        ...datapoint,
+        value: datapoint.value * factor
+      }
+    })
+  }
+
+  if (datapoints.length > length) 
+  {
+    return datapoints.slice(0, length).reverse()
+  }
+  return datapoints.reverse()
+}
