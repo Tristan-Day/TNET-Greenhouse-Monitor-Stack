@@ -1,6 +1,5 @@
 import { useEffect, useContext, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { strftime } from 'strftime'
 
 import {
   Box,
@@ -14,19 +13,18 @@ import {
   Alert,
   useTheme
 } from '@mui/material'
-
 import { LineChart } from '@mui/x-charts'
 
 import { Flex } from './component'
 import { TransmitterIcon } from './component/icon/TransmitterIcon'
 
 import { WindowContext } from './Navigation'
-import { AccountContext } from './App'
+import Loading from './Loading'
 
-import { getMonitoringData, getWeatherData } from './logic/Data'
+import { getMonitoringData, getWeatherData, extractDataset } from './logic/Data'
 import { isValidPostcode } from './logic/Validation'
 
-function LocationDialog({ device, dialogState })
+function LocationDialog({ device, dialogState }) 
 {
   const [postcode, setPostcode] = useState('')
   const [message, setMessage] = useState()
@@ -127,7 +125,7 @@ function LocationDialog({ device, dialogState })
   )
 }
 
-function Header({ device, dialogState })
+function Header({ device, dialogState }) 
 {
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
   const theme = useTheme()
@@ -168,7 +166,7 @@ function Header({ device, dialogState })
   )
 }
 
-function LiveData({ device, weather }) 
+function LiveData({ device, weather })
 {
   const SectionContents = 
   [
@@ -202,21 +200,109 @@ function LiveData({ device, weather })
         const attribute = entry.attribute || entry.name
         const value = device.packets ? device.packets[0].DATA[attribute] : null
 
-        return <DataCard key={entry.name} name={entry.name} units={entry.units} value={value} />
+        return (
+          <DataCard key={entry.name} name={entry.name} 
+            units={entry.units} value={value}
+          />
+        )
       })}
     </Flex>
   )
 }
 
-function Charts({ device, weather }) 
+function ChartData({ device, weather }) 
 {
-  // https://mui.com/x/react-charts/lines/
+  const [viewport, setViewport] = useState({
+    width: window.innerWidth
+  })
 
-  return <LineChart />
+  useEffect(() => {
+    const handleResize = () => {
+      setViewport({
+        width: window.innerWidth
+      })
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
+
+  const SectionContents = [
+    { name: 'Temperature', units: '°C' },
+    { name: 'Pressure', units: 'kPa', scale: 0.001 },
+    { name: 'Humidity', units: '%' },
+
+    { name: 'Soil Sensor A', attribute: 'SoilMoisturePrimary' },
+    { name: 'Soil Sensor B', attribute: 'SoilMoistureSecondary' }
+  ]
+
+  const ChartCard = ({ dataset, name, units, attribute, factor }) => {
+    const width = viewport.width > 550 ? 550 : viewport.width * 0.9
+    const height = width * 0.5
+
+    const label = units ? `${name} - ${units}` : name
+    const data = extractDataset(dataset, attribute || name, width * 0.025, factor)
+
+    return (
+      <LineChart
+        width={width}
+        xAxis={[
+          {
+            dataKey: 'timestamp',
+            valueFormatter: (value) => {
+              return require('strftime')('%H:%M', new Date(value))
+            }
+          }
+        ]}
+        height={height}
+        series={[{ dataKey: 'value', label: label }]}
+        dataset={data}
+      />
+    )
+  }
+
+  return (
+    <Flex sx={{ flexWrap: 'wrap', gap: '2rem', justifyContent: 'center'}}>
+      <Card className="ChartCard">
+        <ChartCard 
+          dataset={device.packets} 
+          name="Temperature" 
+          units="°C" />
+      </Card>
+      <Card className="ChartCard">
+        <ChartCard 
+          dataset={device.packets} 
+          name="Humidity" 
+          units="%" />
+      </Card>
+      <Card className="ChartCard">
+        <ChartCard
+          dataset={device.packets}
+          name="Pressure"
+          units="kPa"
+          factor={0.001}
+        />
+      </Card>
+      <Card className="ChartCard">
+        <ChartCard
+          dataset={device.packets}
+          name="Soil Sensor A"
+          attribute="SoilMoisturePrimary"
+        />
+      </Card>
+      <Card className="ChartCard">
+        <ChartCard
+          dataset={device.packets}
+          name="Soil Sensor B"
+          attribute="SoilMoistureSecondary"
+        />
+      </Card>
+    </Flex>
+  )
 }
 
-function Dashboard() 
-{
+function Dashboard() {
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 
@@ -306,9 +392,16 @@ function Dashboard()
     localStorage.setItem(identifier, JSON.stringify(device))
   }, [device])
 
+  if (!device.packets) {
+    return <Loading />
+  }
+
   return (
     <Flex direction="column" grow={1}>
-      <LocationDialog device={device} dialogState={{ open: dialog, set: setDialog }} />
+      <LocationDialog
+        device={device}
+        dialogState={{ open: dialog, set: setDialog }}
+      />
       <Header device={device} dialogState={{ open: dialog, set: setDialog }} />
       <Divider />
 
@@ -318,8 +411,9 @@ function Dashboard()
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-        <LiveData device={device}/>
+        <LiveData device={device} weather={weather} />
         <Divider />
+        <ChartData device={device} weather={weather} />
       </Flex>
     </Flex>
   )

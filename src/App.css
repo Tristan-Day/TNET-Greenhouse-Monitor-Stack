@@ -25,6 +25,21 @@
     min-height: fit-content;
 }
 
+.ChartCard {
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    flex-direction: column;
+
+    gap: 1rem;
+    padding: 1rem;
+
+    min-width: fit-content;
+    min-height: fit-content;
+}
+
 .Popup {
     display: flex;
 
