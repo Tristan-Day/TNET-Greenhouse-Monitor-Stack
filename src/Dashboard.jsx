@@ -168,22 +168,14 @@ function Header({ device, dialogState })
 
 function LiveData({ device, weather })
 {
-  const SectionContents = 
-  [
-    { name: 'Temperature', units: '°C' },
-    { name: 'Pressure',    units: 'Pa' },
-    { name: 'Humidity',    units: '%'  },
-
-    { name: 'Soil Sensor A', attribute: 'SoilMoisturePrimary'   },
-    { name: 'Soil Sensor B', attribute: 'SoilMoistureSecondary' }
-  ]
-
-  const DataCard = ({ name, units, value }) => {
+  const DataCard = ({ name, units, value, factor }) => 
+  {
+    value = factor ? Math.round((value * factor) * 100) / 10 : value
     return (
       <Card className="DataCard">
         <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
-          <Typography variant="h5">{value || '-'}</Typography>
-          {units && value && <Typography variant="caption">{units}</Typography>}
+          <Typography variant="h5">{value}</Typography>
+          <Typography variant="caption">{units}</Typography>
         </Flex>
         <Typography>{name}</Typography>
       </Card>
@@ -195,17 +187,30 @@ function LiveData({ device, weather })
 
   return (
     <Flex direction={flexDirection} sx={{ gap: '2rem', flexWrap: 'wrap' }}>
-      {SectionContents.map(entry => 
-      {
-        const attribute = entry.attribute || entry.name
-        const value = device.packets ? device.packets[0].DATA[attribute] : null
-
-        return (
-          <DataCard key={entry.name} name={entry.name} 
-            units={entry.units} value={value}
-          />
-        )
-      })}
+      <DataCard
+        name="Temperature"
+        units="°C"
+        value={device.packets[0].DATA[['Temperature']]}
+      />
+      <DataCard
+        name="Pressure"
+        units="kPa"
+        value={device.packets[0].DATA[['Pressure']]}
+        factor={0.001}
+      />
+      <DataCard
+        name="Humidity"
+        units="%"
+        value={device.packets[0].DATA[['Humidity']]}
+      />
+      <DataCard
+        name="Soil Sensor A"
+        value={device.packets[0].DATA[['SoilMoisturePrimary']]}
+      />
+      <DataCard
+        name="Soil Sensor B"
+        value={device.packets[0].DATA[['SoilMoistureSecondary']]}
+      />
     </Flex>
   )
 }
@@ -228,16 +233,8 @@ function ChartData({ device, weather })
     }
   }, [])
 
-  const SectionContents = [
-    { name: 'Temperature', units: '°C' },
-    { name: 'Pressure', units: 'kPa', scale: 0.001 },
-    { name: 'Humidity', units: '%' },
-
-    { name: 'Soil Sensor A', attribute: 'SoilMoisturePrimary' },
-    { name: 'Soil Sensor B', attribute: 'SoilMoistureSecondary' }
-  ]
-
-  const ChartCard = ({ dataset, name, units, attribute, factor }) => {
+  const ChartCard = ({ dataset, name, units, attribute, factor }) => 
+  {
     const label = units ? `${name} - ${units}` : name
     const data = extractDataset(dataset, attribute || name, viewport.width * 0.025, factor)
 
@@ -308,34 +305,13 @@ function Dashboard()
   const [weather, setWeather] = useState({})
   const [device, setDevice] = useState({})
 
-  useEffect(() => {
-    windowContext.setWindow({ title: 'Greenhouse Monitor' })
-  }, [])
-
-  useEffect(() => {
-    if (!identifier) {
-      return
-    }
-    setDevice({
-      ID: identifier,
-      ...JSON.parse(localStorage.getItem(identifier))
-    })
-  }, [identifier])
-
-  useEffect(() => {
+  const refreshData = () => {
     if (!device.ID) {
       return
     }
+    setInterval(refreshData, 660000)
 
     if (device.timestamp) {
-      const date = new Date(device.timestamp)
-      const time = require('strftime')('%F at %H:%M', date)
-
-      windowContext.setWindow({
-        title: 'Greenhouse Monitor',
-        message: `Last Updated: ${time}`
-      })
-
       if (new Date().getTime() - device.timestamp < 600000) {
         if (device.packets) {
           return
@@ -379,11 +355,39 @@ function Dashboard()
           text: 'Failed to retreive weather data'
         })
       })
+  }
+
+  useEffect(() => {
+    windowContext.setWindow({ title: 'Greenhouse Monitor' })
+  }, [])
+
+  useEffect(() => {
+    if (!identifier) {
+      return
+    }
+    setDevice({
+      ID: identifier,
+      ...JSON.parse(localStorage.getItem(identifier))
+    })
+  }, [identifier])
+
+  useEffect(() => {
+    refreshData()
   }, [device])
 
   useEffect(() => {
     if (!identifier) {
       return
+    }
+    if (device.timestamp) {
+      const time = require('strftime')(
+        '%F at %H:%M',
+        new Date(device.timestamp)
+      )
+      windowContext.setWindow({
+        title: 'Greenhouse Monitor',
+        message: `Last Updated: ${time}`
+      })
     }
     localStorage.setItem(identifier, JSON.stringify(device))
   }, [device])
@@ -394,11 +398,9 @@ function Dashboard()
 
   return (
     <Flex direction="column" grow={1}>
-      <LocationDialog
-        device={device}
-        dialogState={{ open: dialog, set: setDialog }}
-      />
+      <LocationDialog device={device} dialogState={{ open: dialog, set: setDialog }} />
       <Header device={device} dialogState={{ open: dialog, set: setDialog }} />
+      
       <Divider />
 
       <Flex grow={1} direction="column" sx={{ margin: '2rem', gap: '2rem' }}>
