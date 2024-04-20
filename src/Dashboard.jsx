@@ -1,18 +1,19 @@
 import { useEffect, useContext, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate, Route } from 'react-router-dom'
 
 import {
   Box,
   Button,
   Typography,
+  IconButton,
   Divider,
   Card,
-  TextField,
-  Backdrop,
   Grow,
   Alert,
   useTheme
 } from '@mui/material'
+
+import { TuneOutlined } from '@mui/icons-material'
 import { LineChart } from '@mui/x-charts'
 
 import { Flex } from './component'
@@ -21,113 +22,14 @@ import { TransmitterIcon } from './component/icon/TransmitterIcon'
 import { WindowContext } from './Navigation'
 import Loading from './Loading'
 
+import Configuration from './subpage/Configuration'
 import { getMonitoringData, getWeatherData, extractDataset } from './logic/Data'
-import { isValidPostcode } from './logic/Validation'
 
-function LocationDialog({ device, dialogState }) 
-{
-  const [postcode, setPostcode] = useState('')
-  const [message, setMessage] = useState()
-
-  const handleSubmit = () => {
-    if (!postcode) {
-      setMessage({ severity: 'warning', text: 'You must enter a postcode' })
-      return
-    }
-
-    if (!isValidPostcode(postcode)) {
-      setMessage({ severity: 'error', text: 'Please enter a valid postcode' })
-      return
-    }
-
-    setMessage({ severity: 'info', text: 'Checking postcode', loading: true })
-
-    fetch(`https://api.postcodes.io/postcodes/${postcode}`)
-      .then(async response => {
-        setMessage({
-          severity: 'success',
-          text: 'Location sucessfully updated'
-        })
-
-        if (response.ok) {
-          const result = (await response.json()).result
-
-          localStorage.setItem(
-            device.ID,
-            JSON.stringify({
-              location: { lon: result.longitude, lat: result.latitude }
-            })
-          )
-        } else {
-          setMessage({
-            severity: 'error',
-            text: 'Postcode not found, please try again'
-          })
-        }
-      })
-      .catch(() => {
-        setMessage({
-          severity: 'error',
-          text: 'Postcode not found, please try again'
-        })
-      })
-  }
-
-  useEffect(() => {
-    setMessage({
-      severity: 'info',
-      text: 'This will enable weather integrations'
-    })
-  }, [])
-
-  return (
-    <Backdrop open={dialogState.open}>
-      <Card className="Popup">
-        {device.location ? (
-          <Typography variant="h5">Update Device Location</Typography>
-        ) : (
-          <Typography variant="h5">Set Device Location</Typography>
-        )}
-
-        {message && (
-          <Grow in>
-            <Alert severity={message.severity}>{message.text}</Alert>
-          </Grow>
-        )}
-        <Divider sx={{ marginBottom: '0.8rem' }} />
-
-        <TextField
-          label="Enter a Postcode"
-          onChange={event => {
-            setPostcode(event.target.value)
-          }}
-          onBlur={event => {
-            setPostcode(event.target.value)
-          }}
-        />
-
-        <Flex sx={{ justifyContent: 'space-between', marginTop: '1rem' }}>
-          <Button
-            variant={message && !message.loading ? 'outlined' : 'disabled'}
-            onClick={() => dialogState.set(false)}
-          >
-            Close
-          </Button>
-          <Button
-            variant={message && !message.loading ? 'contained' : 'disabled'}
-            onClick={() => handleSubmit()}
-          >
-            Save
-          </Button>
-        </Flex>
-      </Card>
-    </Backdrop>
-  )
-}
-
-function Header({ device, dialogState }) 
+function Header({ device }) 
 {
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+
+  const navigate = useNavigate()
   const theme = useTheme()
 
   return (
@@ -136,7 +38,6 @@ function Header({ device, dialogState })
         {!isMobileView && (
           <TransmitterIcon fill={theme.palette.text.primary} size={60} />
         )}
-
         {isMobileView ? (
           <Flex sx={{ alignItems: 'center' }}>
             <Box sx={{ width: '50vw' }}>
@@ -153,24 +54,34 @@ function Header({ device, dialogState })
           </Flex>
         )}
       </Flex>
-
-      <Button
-        variant="outlined"
-        onClick={() => {
-          dialogState.set(true)
-        }}
-      >
-        Set Location
-      </Button>
+      {isMobileView ? (
+        <IconButton
+          variant="outlined"
+          onClick={() => {
+            navigate('configuration')
+          }}
+        >
+          <TuneOutlined fontSize="medium" />
+        </IconButton>
+      ) : (
+        <Button
+          variant="outlined"
+          onClick={() => {
+            navigate('configuration')
+          }}
+        >
+          Edit Configuration
+        </Button>
+      )}
     </Flex>
   )
 }
 
-function LiveData({ device, weather })
+function LiveData({ packets }) 
 {
   const DataCard = ({ name, units, value, factor }) => 
   {
-    value = factor ? Math.round((value * factor) * 100) / 10 : value
+    value = factor ? Math.round(value * factor * 100) / 10 : value
     return (
       <Card className="DataCard">
         <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
@@ -190,32 +101,32 @@ function LiveData({ device, weather })
       <DataCard
         name="Temperature"
         units="°C"
-        value={device.packets[0].DATA[['Temperature']]}
+        value={packets[0].DATA[['Temperature']]}
       />
       <DataCard
         name="Pressure"
         units="kPa"
-        value={device.packets[0].DATA[['Pressure']]}
+        value={packets[0].DATA[['Pressure']]}
         factor={0.001}
       />
       <DataCard
         name="Humidity"
         units="%"
-        value={device.packets[0].DATA[['Humidity']]}
+        value={packets[0].DATA[['Humidity']]}
       />
       <DataCard
         name="Soil Sensor A"
-        value={device.packets[0].DATA[['SoilMoisturePrimary']]}
+        value={packets[0].DATA[['SoilMoisturePrimary']]}
       />
       <DataCard
         name="Soil Sensor B"
-        value={device.packets[0].DATA[['SoilMoistureSecondary']]}
+        value={packets[0].DATA[['SoilMoistureSecondary']]}
       />
     </Flex>
   )
 }
 
-function ChartData({ device, weather }) 
+function ChartData({ packets, weather }) 
 {
   const [viewport, setViewport] = useState({
     width: window.innerWidth
@@ -243,7 +154,7 @@ function ChartData({ device, weather })
         xAxis={[
           {
             dataKey: 'timestamp',
-            valueFormatter: (value) => {
+            valueFormatter: value => {
               return require('strftime')('%H:%M', new Date(value))
             }
           }
@@ -255,22 +166,24 @@ function ChartData({ device, weather })
   }
 
   return (
-    <Flex sx={{ flexWrap: 'wrap', gap: '2rem', justifyContent: 'center'}}>
+    <Flex sx={{ flexWrap: 'wrap', gap: '2rem', justifyContent: 'center' }}>
       <Card className="ChartCard">
         <ChartCard 
-          dataset={device.packets} 
-          name="Temperature" 
-          units="°C" />
+        dataset={packets}
+        name="Temperature"
+        units="°C" 
+        />
       </Card>
       <Card className="ChartCard">
         <ChartCard 
-          dataset={device.packets} 
-          name="Humidity" 
-          units="%" />
+        dataset={packets} 
+        name="Humidity" 
+        units="%"
+        />
       </Card>
       <Card className="ChartCard">
         <ChartCard
-          dataset={device.packets}
+          dataset={packets}
           name="Pressure"
           units="kPa"
           factor={0.001}
@@ -278,14 +191,14 @@ function ChartData({ device, weather })
       </Card>
       <Card className="ChartCard">
         <ChartCard
-          dataset={device.packets}
+          dataset={packets}
           name="Soil Sensor A"
           attribute="SoilMoisturePrimary"
         />
       </Card>
       <Card className="ChartCard">
         <ChartCard
-          dataset={device.packets}
+          dataset={packets}
           name="Soil Sensor B"
           attribute="SoilMoistureSecondary"
         />
@@ -294,26 +207,31 @@ function ChartData({ device, weather })
   )
 }
 
-function Dashboard()
+function Dashboard() 
 {
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 
-  const [dialog, setDialog] = useState(false)
   const [message, setMessage] = useState(false)
-
   const [weather, setWeather] = useState({})
   const [device, setDevice] = useState({})
 
-  const refreshData = () => {
+  // Update local storage with a new dataset
+  const setMonitoringData = data => {
+    setDevice({ ...device, data: data })
+    localStorage.setItem(identifier, JSON.stringify({ ...device, data: data }))
+  }
+
+  // Get new monitoring data from DynamoDB
+  const refreshMonitoringData = () => {
     if (!device.ID) {
       return
     }
-    setInterval(refreshData, 660000)
+    setInterval(refreshMonitoringData, 660000)
 
-    if (device.timestamp) {
-      if (new Date().getTime() - device.timestamp < 600000) {
-        if (device.packets) {
+    if (device.data) {
+      if (new Date().getTime() - device.data.timestamp < 600000) {
+        if (device.data.packets) {
           return
         }
       }
@@ -321,8 +239,7 @@ function Dashboard()
 
     getMonitoringData(device.ID, 600000)
       .then(result => {
-        setDevice({
-          ...device,
+        setMonitoringData({
           timestamp: new Date().getTime(),
           packets: result
         })
@@ -357,10 +274,12 @@ function Dashboard()
       })
   }
 
+  // Set the window title
   useEffect(() => {
     windowContext.setWindow({ title: 'Greenhouse Monitor' })
   }, [])
 
+  // Update device with contents from local storage
   useEffect(() => {
     if (!identifier) {
       return
@@ -371,50 +290,49 @@ function Dashboard()
     })
   }, [identifier])
 
+  // Refresh monitoring data and set window timestamp
   useEffect(() => {
-    refreshData()
-  }, [device])
-
-  useEffect(() => {
-    if (!identifier) {
-      return
-    }
-    if (device.timestamp) {
+    if (device.data) {
       const time = require('strftime')(
         '%F at %H:%M',
-        new Date(device.timestamp)
+        new Date(device.data.timestamp)
       )
       windowContext.setWindow({
         title: 'Greenhouse Monitor',
         message: `Last Updated: ${time}`
       })
     }
-    localStorage.setItem(identifier, JSON.stringify(device))
+    refreshMonitoringData()
   }, [device])
 
-  if (!device.packets) {
+  if (!device.data) {
     return <Loading />
   }
 
   return (
     <Flex direction="column" grow={1}>
-      <LocationDialog device={device} dialogState={{ open: dialog, set: setDialog }} />
-      <Header device={device} dialogState={{ open: dialog, set: setDialog }} />
-      
+      <Header device={device} />
       <Divider />
-
-      <Flex grow={1} direction="column" sx={{ margin: '2rem', gap: '2rem' }}>
+      <Flex direction="column" grow={1} sx={{ margin: '2rem', gap: '2rem' }}>
         {message && (
           <Grow in>
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-        <LiveData device={device} weather={weather} />
+        <LiveData packets={device.data.packets} />
         <Divider />
-        <ChartData device={device} weather={weather} />
+        <ChartData packets={device.data.packets} />
       </Flex>
     </Flex>
   )
 }
 
-export default Dashboard
+export default function DashboardRoutes() 
+{
+  return (
+    <Route path="devices">
+      <Route path=":identifier" element={<Dashboard />} />
+      <Route path=":identifier/configuration" element={<Configuration />} />
+    </Route>
+  )
+}

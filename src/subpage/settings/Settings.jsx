@@ -12,14 +12,14 @@ import {
 } from '@mui/material'
 import { DeviceHub, InfoRounded } from '@mui/icons-material'
 
-import { Flex } from '../component'
-import { AccountIcon } from '../component/icon/AccountIcon'
+import { Flex } from '../../component'
+import { AccountIcon } from '../../component/icon/AccountIcon'
 
 import Devices from './Devices'
 import Legal from './Legal'
 
-import { AccountContext } from '../App'
-import { WindowContext } from '../Navigation'
+import { AccountContext } from '../../App'
+import { WindowContext } from '../../Navigation'
 
 const SettingsContents = 
 [
@@ -41,7 +41,6 @@ function Header()
         {!isMobileView && (
           <AccountIcon fill={theme.palette.text.primary} size={60} />
         )}
-
         {isMobileView ? (
           <Flex sx={{ alignItems: 'center' }}>
             <Box sx={{ width: '50vw' }}>
@@ -62,7 +61,7 @@ function Header()
       <Button
         variant="outlined"
         onClick={() => {
-          navigate(`/${accountContext.DEVICES[0]}`)
+          navigate(`/devices/${accountContext.DEVICES[0]}`)
         }}
       >
         Return
@@ -87,6 +86,7 @@ function Settings()
     setTab(value)
   }
 
+  // Set the window title
   useEffect(() => {
     windowContext.setWindow({ title: 'Settings' })
   }, [])
