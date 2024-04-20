@@ -135,13 +135,15 @@ export function Navigation()
                   <ListItemButton
                     onClick={() => {
                       setDrawer(false)
-                      navigate(device)
+                      navigate(`devices/${device}`)
                     }}
                   >
                     <ListItemIcon>
                       <DevicesOutlined />
                     </ListItemIcon>
-                    <ListItemText>{device.substring(0, 23)}...</ListItemText>
+                    <ListItemText>
+                      {device.substring(0, 23)}...
+                    </ListItemText>
                   </ListItemButton>
                 </ListItem>
               )

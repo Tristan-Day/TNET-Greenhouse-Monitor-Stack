@@ -7,12 +7,11 @@ import { CssBaseline } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
 import { getUserData } from './logic/User'
-
 import { Navigation } from './Navigation'
-import SettingsRoutes from './subpage/Settings'
 
-import Dashboard from './Dashboard'
 import Loading from './Loading'
+import DashboardRoutes from './Dashboard'
+import SettingsRoutes from './subpage/settings'
 
 let theme = 'light'
 if (
@@ -48,7 +47,9 @@ function App()
       : window.location.href
 
     if (location.split('/').length < 4) {
-      window.location.replace(`${window.location.href}${account.DEVICES[0]}`)
+      window.location.replace(
+        `${window.location.href}devices/${account.DEVICES[0]}`
+      )
     }
   }, [account])
 
@@ -59,9 +60,8 @@ function App()
           <CssBaseline>
             <Routes>
               <Route path="*" element={<Navigation />}>
+                {DashboardRoutes()} {SettingsRoutes()}
                 <Route index element={<Loading />}/>
-                <Route path=":identifier" element={<Dashboard />} />
-                {SettingsRoutes()}
               </Route>
             </Routes>
           </CssBaseline>

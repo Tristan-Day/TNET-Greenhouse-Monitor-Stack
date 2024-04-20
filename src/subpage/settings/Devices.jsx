@@ -14,13 +14,13 @@ import {
 } from '@mui/material'
 import { Add } from '@mui/icons-material'
 
-import { Flex } from '../component'
-import { MonitoringIcon } from '../component/icon/MonitoringIcon'
+import { Flex } from '../../component'
+import { MonitoringIcon } from '../../component/icon/MonitoringIcon'
 
-import { isValidIdentifier } from '../logic/Validation'
-import { registerDevice } from '../logic/User'
+import { isValidIdentifier } from '../../logic/Validation'
+import { registerDevice } from '../../logic/User'
 
-import { AccountContext } from '../App'
+import { AccountContext } from '../../App'
 
 function RegistrationDialog({ dialogState }) 
 {
