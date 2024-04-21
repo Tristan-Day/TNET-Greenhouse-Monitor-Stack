@@ -386,7 +386,7 @@ function Dashboard()
   }, [model])
 
   if (!model) {
-    return <Loading />
+    return <Loading text="Loading Monitoring Data" />
   }
 
   return (
