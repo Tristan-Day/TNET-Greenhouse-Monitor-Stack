@@ -152,7 +152,7 @@ export default function Devices()
         My Devices
       </Typography>
 
-      {accountContext.DEVICES && !accountContext.DEVICES.length && !dialog && (
+      {!accountContext.DEVICES && !dialog && (
         <Grow in>
           <Alert severity="info" sx={{ marginBottom: '1.2rem' }}>
             You Currently have no Registered Devices
