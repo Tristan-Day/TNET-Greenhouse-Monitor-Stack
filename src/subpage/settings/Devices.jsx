@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import {
   Box,
@@ -17,10 +18,9 @@ import { Add } from '@mui/icons-material'
 import { Flex } from '../../component'
 import { MonitoringIcon } from '../../component/icon/MonitoringIcon'
 
+import { AccountContext } from '../../App'
 import { isValidIdentifier } from '../../logic/Validation'
 import { registerDevice } from '../../logic/User'
-
-import { AccountContext } from '../../App'
 
 function RegistrationDialog({ dialogState }) 
 {
@@ -126,10 +126,11 @@ function RegistrationDialog({ dialogState })
 
 function DeviceCard({ label, identifier }) 
 {
+  const navigate = useNavigate()
   label = label ? label : 'Greenhouse Monitor'
 
   return (
-    <Card className='Card'>
+    <Card className="Card" onClick={() => {navigate(`/devices/${identifier}`)}}>
       <MonitoringIcon size={35} />
       <Flex direction="column">
         <Typography variant="h6">{label}</Typography>
