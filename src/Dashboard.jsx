@@ -350,7 +350,7 @@ function Dashboard()
       ID: identifier,
       ...JSON.parse(localStorage.getItem(identifier))
     })
-  }, [])
+  }, [identifier])
 
   useEffect(() => {
     if (!device) {
