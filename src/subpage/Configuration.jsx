@@ -252,7 +252,7 @@ export default function Configuration()
   }, [identifier])
 
   if (!device.ID) {
-    return <Loading />
+    return <Loading text="Loading Device Configuration" />
   }
 
   return (

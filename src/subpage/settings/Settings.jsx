@@ -15,6 +15,7 @@ import { DeviceHub, InfoRounded } from '@mui/icons-material'
 import { Flex } from '../../component'
 import { AccountIcon } from '../../component/icon/AccountIcon'
 
+import Loading from '../../Loading'
 import Devices from './Devices'
 import Legal from './Legal'
 
@@ -77,8 +78,9 @@ function Header()
 function Settings() 
 {
   const windowContext = useContext(WindowContext)
-  const [tab, setTab] = useState(0)
+  const accountContext = useContext(AccountContext)
 
+  const [tab, setTab] = useState(0)
   const navigate = useNavigate()
 
   const Contents = SettingsContents.map((entry, index) => {
@@ -94,6 +96,10 @@ function Settings()
   useEffect(() => {
     windowContext.setWindow({ title: 'Settings' })
   }, [])
+
+  if (!accountContext.DEVICES) {
+    return <Loading text="Loading Account Details" />
+  }
 
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
 
