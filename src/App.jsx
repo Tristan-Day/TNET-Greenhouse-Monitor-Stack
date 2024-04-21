@@ -38,19 +38,16 @@ function App()
   }, [])
 
   useEffect(() => {
-    if (!account.DEVICES) {
-      return
+    const location = window.location.href.endsWith('/')
+    ? window.location.href.substring(0, window.location.href.length - 1)
+    : window.location.href
+
+    if (!account.DEVICES && location.split('/').length < 4) {
+      window.location.replace(`${window.location.href}settings`)
     }
 
-    const location = window.location.href.endsWith('/')
-      ? window.location.href.substring(0, window.location.href.length - 1)
-      : window.location.href
-
-    if (location.split('/').length < 4) {
-      const page = account.DEVICES.length
-        ? `devices/${account.DEVICES[0]}`
-        : `settings`
-      window.location.replace(`${window.location.href}${page}`)
+    else if (location.split('/').length < 4) {
+      window.location.replace(`${window.location.href}devices/${account.DEVICES[0]}`)
     }
   }, [account])
 
