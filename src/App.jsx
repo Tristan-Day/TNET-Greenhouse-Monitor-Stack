@@ -47,9 +47,10 @@ function App()
       : window.location.href
 
     if (location.split('/').length < 4) {
-      window.location.replace(
-        `${window.location.href}devices/${account.DEVICES[0]}`
-      )
+      const page = account.DEVICES.length
+        ? `devices/${account.DEVICES[0]}`
+        : `settings`
+      window.location.replace(`${window.location.href}${page}`)
     }
   }, [account])
 

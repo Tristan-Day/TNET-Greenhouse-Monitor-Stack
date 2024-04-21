@@ -9,7 +9,8 @@ import {
   TextField,
   Grow,
   Alert,
-  useTheme
+  useTheme,
+  InputAdornment
 } from '@mui/material'
 
 import { Flex } from '../component'
@@ -18,7 +19,7 @@ import { TransmitterIcon } from '../component/icon/TransmitterIcon'
 import { WindowContext } from '../Navigation'
 import Loading from '../Loading'
 
-import { isValidPostcode } from '../logic/Validation'
+import { isValidFloat, isValidPostcode } from '../logic/Validation'
 
 function Header({ device }) {
   const navigate = useNavigate()
@@ -154,10 +155,10 @@ function ThresholdConfiguration({ configuration, setConfiguration })
     }
 
     for (const value of Object.values(thresholds)) {
-      if (isNaN(parseFloat(value))) {
+      if (value.length && (!isValidFloat(value))) {
         setMessage({
           severity: 'error',
-          text: 'Thresholds cannot contain letters'
+          text: 'Thresholds must be decimal'
         })
         return
       }
@@ -189,26 +190,30 @@ function ThresholdConfiguration({ configuration, setConfiguration })
       )}
 
       <TextField
-        label="Target Temperature"
+        label="Temperature Limit"
         onChange={event => {
-          event.target.value &&
-            setThreshold({ ...thresholds, temperature: event.target.value })
+          setThreshold({ ...thresholds, temperature: event.target.value })
         }}
         onBlur={() => {
           handleSubmit()
         }}
         value={thresholds.temperature || ''}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">°C</InputAdornment>
+        }}
       />
       <TextField
-        label="Target Humidity"
+        label="Humidity Limit"
         onChange={event => {
-          event.target.value &&
-            setThreshold({ ...thresholds, humidity: event.target.value })
+          setThreshold({ ...thresholds, humidity: event.target.value })
         }}
         onBlur={() => {
           handleSubmit()
         }}
         value={thresholds.humidity || ''}
+        InputProps={{
+          endAdornment: <InputAdornment position="end">%</InputAdornment>
+        }}
       />
     </Flex>
   )
@@ -228,7 +233,6 @@ export default function Configuration()
       identifier,
       JSON.stringify({ ...device, configuration: configuration })
     )
-    console.log(configuration)
   }
 
   // Set the window title

@@ -71,7 +71,7 @@ function RegistrationDialog({ dialogState })
 
   return (
     <Backdrop open={dialogState.open}>
-      <Card className='Popup'>
+      <Card className="Popup">
         <Typography variant="h5">Register a Device</Typography>
 
         {message && (
@@ -101,7 +101,13 @@ function RegistrationDialog({ dialogState })
         />
 
         <Flex sx={{ justifyContent: 'space-between', marginTop: '1rem' }}>
-          <Button variant="outlined" onClick={() => dialogState.set(false)}>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              dialogState.set(false)
+              window.location.reload()
+            }}
+          >
             Close
           </Button>
           <Button

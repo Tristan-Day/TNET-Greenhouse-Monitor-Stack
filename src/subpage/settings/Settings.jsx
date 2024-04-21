@@ -59,7 +59,11 @@ function Header()
       </Flex>
 
       <Button
-        variant="outlined"
+        variant={
+          !accountContext.DEVICES || !accountContext.DEVICES.length
+            ? 'disabled'
+            : 'outlined'
+        }
         onClick={() => {
           navigate(`/devices/${accountContext.DEVICES[0]}`)
         }}
