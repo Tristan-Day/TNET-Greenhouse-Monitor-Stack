@@ -11,3 +11,9 @@ export function isValidIdentifier(string)
   return string.match(
       /[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
 }
+
+// Determine if a given string is a valid float
+export function isValidFloat(string)
+{
+  return /^(0|[1-9]\d*)(\.\d+)?$/.test(string)
+}

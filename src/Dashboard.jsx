@@ -23,7 +23,8 @@ import { WindowContext } from './Navigation'
 import Loading from './Loading'
 
 import Configuration from './subpage/Configuration'
-import { getMonitoringData, getWeatherData, extractDataset } from './logic/Data'
+import { getMonitoringData, getWeatherData, DataModel } from './logic/Data'
+import strftime from 'strftime'
 
 function Header({ device }) 
 {
@@ -77,11 +78,10 @@ function Header({ device })
   )
 }
 
-function LiveData({ packets }) 
+function LiveData({ model }) 
 {
-  const DataCard = ({ name, units, value, factor }) => 
+  const DataCard = ({ name, units, value }) => 
   {
-    value = factor ? Math.round(value * factor * 100) / 10 : value
     return (
       <Card className="DataCard">
         <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
@@ -101,37 +101,37 @@ function LiveData({ packets })
       <DataCard
         name="Temperature"
         units="°C"
-        value={packets[0].DATA[['Temperature']]}
-      />
-      <DataCard
-        name="Pressure"
-        units="kPa"
-        value={packets[0].DATA[['Pressure']]}
-        factor={0.001}
+        value={model.getLatestValue('Temperature')}
       />
       <DataCard
         name="Humidity"
         units="%"
-        value={packets[0].DATA[['Humidity']]}
+        value={model.getLatestValue('Humidity')}
+      />
+      <DataCard
+        name="Pressure"
+        units="kPa"
+        value={Math.round(model.getLatestValue('Pressure') * 0.001)}
       />
       <DataCard
         name="Soil Sensor A"
-        value={packets[0].DATA[['SoilMoisturePrimary']]}
+        value={model.getLatestValue('SoilMoisturePrimary')}
       />
       <DataCard
         name="Soil Sensor B"
-        value={packets[0].DATA[['SoilMoistureSecondary']]}
+        value={model.getLatestValue('SoilMoistureSecondary')}
       />
     </Flex>
   )
 }
 
-function ChartData({ packets, weather }) 
+function ChartData({ model }) 
 {
   const [viewport, setViewport] = useState({
     width: window.innerWidth
   })
 
+  // Add a hook to capture window size changes
   useEffect(() => {
     const handleResize = () => {
       setViewport({
@@ -144,13 +144,25 @@ function ChartData({ packets, weather })
     }
   }, [])
 
-  const ChartCard = ({ dataset, name, units, attribute, factor }) => 
+  const ChartCard = ({ dataset, series, legend }) => 
   {
-    const label = units ? `${name} - ${units}` : name
-    const data = extractDataset(dataset, attribute || name, viewport.width * 0.025, factor)
+    const props = legend
+      ? {
+          legend: {
+            padding: { top: -10 },
+            itemGap: 20, markGap: 10
+          }
+        }
+      : {
+          legend: {
+            hidden: true
+          }
+        }
 
     return (
       <LineChart
+        slotProps={props}
+        skipAnimation
         xAxis={[
           {
             dataKey: 'timestamp',
@@ -159,48 +171,75 @@ function ChartData({ packets, weather })
             }
           }
         ]}
-        series={[{ dataKey: 'value', label: label }]}
-        dataset={data}
+        series={series}
+        dataset={dataset}
+        margin={{ bottom: 30 }}
       />
     )
   }
 
+  // Determine the number of points to show
+  const length = viewport.width * 0.015
+
   return (
     <Flex sx={{ flexWrap: 'wrap', gap: '2rem', justifyContent: 'center' }}>
       <Card className="ChartCard">
-        <ChartCard 
-        dataset={packets}
-        name="Temperature"
-        units="°C" 
-        />
+        <Typography>Temperature (°C)</Typography>
+        {model.includesWeatherData() ? (
+          <ChartCard
+            dataset={model.getDataset('Temperature', length)}
+            series={[
+              { dataKey: 'indoor', label: 'Indoor' },
+              { dataKey: 'outdoor', label: 'Outdoor' }
+            ]}
+            legend={true}
+          />
+        ) : (
+          <ChartCard
+            dataset={model.getDataset('Temperature', length)}
+            series={[{ dataKey: 'value', label: 'Temperature °C' }]}
+          />
+        )}
       </Card>
       <Card className="ChartCard">
-        <ChartCard 
-        dataset={packets} 
-        name="Humidity" 
-        units="%"
-        />
+        <Typography>Humidity (%)</Typography>
+        {model.includesWeatherData() ? (
+          <ChartCard
+            dataset={model.getDataset('Humidity', length)}
+            series={[
+              { dataKey: 'indoor', label: 'Indoor' },
+              { dataKey: 'outdoor', label: 'Outdoor' }
+            ]}
+            legend={true}
+          />
+        ) : (
+          <ChartCard
+            dataset={model.getDataset('Humidity', length)}
+            series={[{ dataKey: 'value', label: 'Humidity %' }]}
+          />
+        )}
       </Card>
       <Card className="ChartCard">
+        <Typography>Pressure (kPa)</Typography>
         <ChartCard
-          dataset={packets}
-          name="Pressure"
-          units="kPa"
-          factor={0.001}
+          dataset={model.getDataset('Pressure', length).map(datapoint => {
+            return { ...datapoint, value: datapoint.value * 0.001 }
+          })}
+          series={[{ dataKey: 'value', label: 'Pressure kPa' }]}
         />
       </Card>
       <Card className="ChartCard">
+        <Typography>Soil Sensor A</Typography>
         <ChartCard
-          dataset={packets}
-          name="Soil Sensor A"
-          attribute="SoilMoisturePrimary"
+          dataset={model.getDataset('SoilMoisturePrimary', length)}
+          series={[{ dataKey: 'value', label: 'Soil Sensor A' }]}
         />
       </Card>
       <Card className="ChartCard">
+        <Typography>Soil Sensor B</Typography>
         <ChartCard
-          dataset={packets}
-          name="Soil Sensor B"
-          attribute="SoilMoistureSecondary"
+          dataset={model.getDataset('SoilMoistureSecondary', length)}
+          series={[{ dataKey: 'value', label: 'Soil Sensor B' }]}
         />
       </Card>
     </Flex>
@@ -212,37 +251,31 @@ function Dashboard()
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 
-  const [message, setMessage] = useState(false)
-  const [weather, setWeather] = useState({})
-  const [device, setDevice] = useState({})
+  const [weather, setWeather] = useState()
+  const [device, setDevice] = useState()
 
-  // Update local storage with a new dataset
-  const setMonitoringData = data => {
-    setDevice({ ...device, data: data })
-    localStorage.setItem(identifier, JSON.stringify({ ...device, data: data }))
-  }
+  const [message, setMessage] = useState(false)
+  const [model, setModel] = useState()
 
   // Get new monitoring data from DynamoDB
   const refreshMonitoringData = () => {
-    if (!device.ID) {
-      return
-    }
-    setInterval(refreshMonitoringData, 660000)
-
-    if (device.data) {
-      if (new Date().getTime() - device.data.timestamp < 600000) {
-        if (device.data.packets) {
+    if (device.cache) {
+      if (new Date().getTime() - device.cache.timestamp < 60000) {
+        if (device.cache.packets) {
           return
         }
       }
     }
-
-    getMonitoringData(device.ID, 600000)
+    getMonitoringData(device.ID)
       .then(result => {
-        setMonitoringData({
-          timestamp: new Date().getTime(),
-          packets: result
-        })
+        // Cache the result in local storage
+        const cache = { timestamp: new Date().getTime(), packets: result }
+
+        setDevice({ ...device, cache: cache })
+        localStorage.setItem(
+          device.ID,
+          JSON.stringify({ ...device, cache: cache })
+        )
       })
       .catch(error => {
         setMessage({
@@ -250,15 +283,19 @@ function Dashboard()
           text: error.message
         })
       })
+  }
 
-    if (!device.location) {
+  // Get new weather data from OpenMetro
+  const refreshWeatherData = () => {
+    if (!device.configuration || !device.configuration.location) {
       return
     }
+    const location = device.configuration.location
 
-    getWeatherData(device.location.lat, device.location.lon)
+    getWeatherData(location.lat, location.lon)
       .then(async response => {
         if (response.ok) {
-          setWeather(await response.json())
+          setWeather((await response.json()).hourly)
         } else {
           setMessage({
             severity: 'error',
@@ -274,38 +311,81 @@ function Dashboard()
       })
   }
 
-  // Set the window title
-  useEffect(() => {
-    windowContext.setWindow({ title: 'Greenhouse Monitor' })
-  }, [])
-
-  // Update device with contents from local storage
-  useEffect(() => {
-    if (!identifier) {
+  const refreshAlertData = () => {
+    if (!device.configuration || !device.configuration.thresholds) {
       return
     }
+    const thresholds = device.configuration.thresholds
+
+    if (thresholds['temperature'] < model.getLatestValue('Temperature')) {
+      const difference = Math.round(
+        model.getLatestValue('Temperature') - thresholds['temperature']
+      )
+      setMessage({
+        severity: 'warning',
+        text: `Greenhouse temperature is ${difference}°C above alert threshold`
+      })
+    } 
+    
+    else if (thresholds['humidity'] < model.getLatestValue('Humidity')) {
+      const difference = Math.round(
+        model.getLatestValue('Humidity') - thresholds['humidity']
+      )
+      setMessage({
+        severity: 'warning',
+        text: `Greenhouse humidity is ${difference}% above alert threshold`
+      })
+    }
+    
+    else {
+      setMessage(undefined)
+    }
+  }
+
+  // Set the window title and import data from localstorage
+  useEffect(() => {
+    windowContext.setWindow({ title: 'Greenhouse Monitor' })
+
     setDevice({
       ID: identifier,
       ...JSON.parse(localStorage.getItem(identifier))
     })
-  }, [identifier])
+  }, [])
 
-  // Refresh monitoring data and set window timestamp
   useEffect(() => {
-    if (device.data) {
-      const time = require('strftime')(
-        '%F at %H:%M',
-        new Date(device.data.timestamp)
-      )
+    if (!device) {
+      return
+    }
+    // Update weather data every 10 minutes
+    refreshMonitoringData()
+    setInterval(refreshMonitoringData, 660000)
+
+    // Update weather data every 60 minutes
+    refreshWeatherData()
+    setInterval(refreshWeatherData, 3600000)
+  }, [device])
+
+  useEffect(() => {
+    if (device && device.cache) {
+      const time = strftime('%F at %H:%M', new Date(device.cache.timestamp))
       windowContext.setWindow({
         title: 'Greenhouse Monitor',
         message: `Last Updated: ${time}`
       })
     }
-    refreshMonitoringData()
-  }, [device])
 
-  if (!device.data) {
+    if (device && device.cache) {
+      setModel(new DataModel(device.cache.packets, weather))
+    }
+  }, [device, weather])
+
+  useEffect(() => {
+    if (model) {
+      refreshAlertData()
+    }
+  }, [model])
+
+  if (!model) {
     return <Loading />
   }
 
@@ -319,16 +399,15 @@ function Dashboard()
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-        <LiveData packets={device.data.packets} />
+        <LiveData model={model} />
         <Divider />
-        <ChartData packets={device.data.packets} />
+        <ChartData model={model} />
       </Flex>
     </Flex>
   )
 }
 
-export default function DashboardRoutes() 
-{
+export default function DashboardRoutes() {
   return (
     <Route path="devices">
       <Route path=":identifier" element={<Dashboard />} />
