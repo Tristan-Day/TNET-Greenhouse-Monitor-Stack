@@ -94,10 +94,12 @@ function LiveData({ model })
   }
 
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+
   const flexDirection = isMobileView ? 'column' : 'row'
+  const flexSpacing = isMobileView ? '1rem' : '2rem'
 
   return (
-    <Flex direction={flexDirection} sx={{ gap: '2rem', flexWrap: 'wrap' }}>
+    <Flex direction={flexDirection} sx={{ gap: flexSpacing, flexWrap: 'wrap' }}>
       <DataCard
         name="Temperature"
         units="°C"
@@ -155,14 +157,14 @@ function ChartData({ model })
         }
       : {
           legend: {
-            hidden: true
+            hidden: true,
           }
         }
 
     return (
       <LineChart
         slotProps={props}
-        skipAnimation
+        sx={{paddingTop: legend ? '0.6rem' : 0}}
         xAxis={[
           {
             dataKey: 'timestamp',
@@ -171,20 +173,23 @@ function ChartData({ model })
             }
           }
         ]}
-        series={series}
-        dataset={dataset}
-        margin={{ bottom: 30 }}
+        series={series} dataset={dataset}
+        margin={{ bottom: 30, top: legend ? 42 : 20 }}
+        skipAnimation
       />
     )
   }
 
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+  const flexSpacing = isMobileView ? '1rem' : '2rem'
+
   // Determine the number of points to show
-  const length = viewport.width * 0.015
+  const length = viewport.width * 0.025
 
   return (
-    <Flex sx={{ flexWrap: 'wrap', gap: '2rem', justifyContent: 'center' }}>
+    <Flex sx={{ flexWrap: 'wrap', gap: flexSpacing, justifyContent: 'center' }}>
       <Card className="ChartCard">
-        <Typography>Temperature (°C)</Typography>
+        <Typography variant='h6'>Temperature (°C)</Typography>
         {model.includesWeatherData() ? (
           <ChartCard
             dataset={model.getDataset('Temperature', length)}
@@ -192,7 +197,7 @@ function ChartData({ model })
               { dataKey: 'indoor', label: 'Indoor' },
               { dataKey: 'outdoor', label: 'Outdoor' }
             ]}
-            legend={true}
+            legend
           />
         ) : (
           <ChartCard
@@ -202,7 +207,7 @@ function ChartData({ model })
         )}
       </Card>
       <Card className="ChartCard">
-        <Typography>Humidity (%)</Typography>
+        <Typography variant='h6'>Humidity (%)</Typography>
         {model.includesWeatherData() ? (
           <ChartCard
             dataset={model.getDataset('Humidity', length)}
@@ -210,7 +215,7 @@ function ChartData({ model })
               { dataKey: 'indoor', label: 'Indoor' },
               { dataKey: 'outdoor', label: 'Outdoor' }
             ]}
-            legend={true}
+            legend
           />
         ) : (
           <ChartCard
@@ -220,7 +225,7 @@ function ChartData({ model })
         )}
       </Card>
       <Card className="ChartCard">
-        <Typography>Pressure (kPa)</Typography>
+        <Typography variant='h6'>Pressure (kPa)</Typography>
         <ChartCard
           dataset={model.getDataset('Pressure', length).map(datapoint => {
             return { ...datapoint, value: datapoint.value * 0.001 }
@@ -229,14 +234,14 @@ function ChartData({ model })
         />
       </Card>
       <Card className="ChartCard">
-        <Typography>Soil Sensor A</Typography>
+        <Typography variant='h6'>Soil Sensor A</Typography>
         <ChartCard
           dataset={model.getDataset('SoilMoisturePrimary', length)}
           series={[{ dataKey: 'value', label: 'Soil Sensor A' }]}
         />
       </Card>
       <Card className="ChartCard">
-        <Typography>Soil Sensor B</Typography>
+        <Typography variant='h6'>Soil Sensor B</Typography>
         <ChartCard
           dataset={model.getDataset('SoilMoistureSecondary', length)}
           series={[{ dataKey: 'value', label: 'Soil Sensor B' }]}
@@ -389,17 +394,20 @@ function Dashboard()
     return <Loading text="Loading Monitoring Data" />
   }
 
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+  const spacing = isMobileView ? '1rem' : '2rem'
+
   return (
     <Flex direction="column" grow={1}>
       <Header device={device} />
       <Divider />
-      <Flex direction="column" grow={1} sx={{ margin: '2rem', gap: '2rem' }}>
+      <Flex direction="column" grow={1} sx={{ margin: spacing, gap: spacing }}>
         {message && (
           <Grow in>
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-        <LiveData model={model} />
+        <LiveData model={model}/>
         <Divider />
         <ChartData model={model} />
       </Flex>
