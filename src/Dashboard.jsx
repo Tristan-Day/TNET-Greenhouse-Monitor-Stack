@@ -260,6 +260,7 @@ function Dashboard()
   const [device, setDevice] = useState()
 
   const [message, setMessage] = useState(false)
+  const [timers, setTimers] = useState({})
   const [model, setModel] = useState()
 
   // Get new monitoring data from DynamoDB
@@ -320,7 +321,9 @@ function Dashboard()
     if (!device.configuration || !device.configuration.thresholds) {
       return
     }
+
     const thresholds = device.configuration.thresholds
+    setMessage(undefined)
 
     if (thresholds['temperature'] < model.getLatestValue('Temperature')) {
       const difference = Math.round(
@@ -341,10 +344,6 @@ function Dashboard()
         text: `Greenhouse humidity is ${difference}% above alert threshold`
       })
     }
-    
-    else {
-      setMessage(undefined)
-    }
   }
 
   // Set the window title and import data from localstorage
@@ -361,13 +360,22 @@ function Dashboard()
     if (!device) {
       return
     }
-    // Update weather data every 10 minutes
-    refreshMonitoringData()
-    setInterval(refreshMonitoringData, 660000)
 
-    // Update weather data every 60 minutes
-    refreshWeatherData()
-    setInterval(refreshWeatherData, 3600000)
+    if (!timers.monitoringData) {
+      setTimers({...timers, monitoringData: true})
+
+      // Update weather data every 10 minutes
+      refreshMonitoringData()
+      setInterval(refreshMonitoringData, 660000)     
+    }
+
+    if (!timers.getWeatherData) {
+      setTimers({...timers, weatherData: true})
+
+      // Update weather data every 60 minutes
+      refreshWeatherData()
+      setInterval(refreshWeatherData, 3600000)      
+    }
   }, [device])
 
   useEffect(() => {
