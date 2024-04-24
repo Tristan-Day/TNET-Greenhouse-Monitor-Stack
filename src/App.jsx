@@ -13,12 +13,15 @@ import Loading from './Loading'
 import DashboardRoutes from './Dashboard'
 import SettingsRoutes from './subpage/settings'
 
-let theme = 'light'
+let theme = {
+  palette: { mode: 'light', contrastThreshold: 4.5 }
+}
+
 if (
   window.matchMedia &&
   window.matchMedia('(prefers-color-scheme: dark)').matches
 ) {
-  theme = 'dark'
+  theme.palette.mode = 'dark'
 }
 
 export const AccountContext = createContext({})
@@ -54,7 +57,7 @@ function App()
   return (
     <AccountContext.Provider value={account}>
       <BrowserRouter>
-        <ThemeProvider theme={createTheme({ palette: { mode: theme } })}>
+        <ThemeProvider theme={createTheme(theme)}>
           <CssBaseline>
             <Routes>
               <Route path="*" element={<Navigation />}>
