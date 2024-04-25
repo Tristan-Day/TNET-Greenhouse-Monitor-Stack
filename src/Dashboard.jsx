@@ -329,9 +329,8 @@ function Dashboard()
       if (
         parseFloat(thresholds['temperature']) < model.getLatestValue('Temperature')
       ) {
-        const difference = Math.round(
-          model.getLatestValue('Temperature') - thresholds['temperature']
-        )
+        const difference = (
+          model.getLatestValue('Temperature') - thresholds['temperature']).toPrecision(2)
         setMessage({
           severity: 'warning',
           text: `Greenhouse temperature is ${difference}°C above alert threshold`
@@ -340,7 +339,7 @@ function Dashboard()
     } 
     else if (thresholds['humidity']) {
       if (
-        parseFloat(thresholds['humidity']) < model.getLatestValue('Humidity')
+        parseFloat(thresholds['humidity']) < model.getLatestValue('Humidity').toPrecision(2)
       ) {
         const difference = Math.round(
           model.getLatestValue('Humidity') - thresholds['humidity']
