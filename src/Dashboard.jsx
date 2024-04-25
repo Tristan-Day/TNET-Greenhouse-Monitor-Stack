@@ -325,24 +325,31 @@ function Dashboard()
     const thresholds = device.configuration.thresholds
     setMessage(undefined)
 
-    if (thresholds['temperature'] < model.getLatestValue('Temperature')) {
-      const difference = Math.round(
-        model.getLatestValue('Temperature') - thresholds['temperature']
-      )
-      setMessage({
-        severity: 'warning',
-        text: `Greenhouse temperature is ${difference}°C above alert threshold`
-      })
+    if (thresholds['temperature']) {
+      if (
+        parseFloat(thresholds['temperature']) < model.getLatestValue('Temperature')
+      ) {
+        const difference = Math.round(
+          model.getLatestValue('Temperature') - thresholds['temperature']
+        )
+        setMessage({
+          severity: 'warning',
+          text: `Greenhouse temperature is ${difference}°C above alert threshold`
+        })
+      }
     } 
-    
-    else if (thresholds['humidity'] < model.getLatestValue('Humidity')) {
-      const difference = Math.round(
-        model.getLatestValue('Humidity') - thresholds['humidity']
-      )
-      setMessage({
-        severity: 'warning',
-        text: `Greenhouse humidity is ${difference}% above alert threshold`
-      })
+    else if (thresholds['humidity']) {
+      if (
+        parseFloat(thresholds['humidity']) < model.getLatestValue('Humidity')
+      ) {
+        const difference = Math.round(
+          model.getLatestValue('Humidity') - thresholds['humidity']
+        )
+        setMessage({
+          severity: 'warning',
+          text: `Greenhouse humidity is ${difference}% above alert threshold`
+        })
+      }
     }
   }
 
