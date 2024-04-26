@@ -147,11 +147,7 @@ export class DataModel
         if (!this.includesWeatherData()) {
           return this.#extractMonitoringDataset('Humidity', length)
         }
-        return this.#extractDualDataset(
-          'Humidity',
-          'relative_humidity_2m',
-          length
-        )
+        return this.#extractDualDataset('Humidity', 'relative_humidity_2m', length)
 
       default:
         return this.#extractMonitoringDataset(property, length)
