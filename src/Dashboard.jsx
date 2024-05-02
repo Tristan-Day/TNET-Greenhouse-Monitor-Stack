@@ -394,7 +394,9 @@ function Dashboard()
     }
 
     if (device && device.cache && device.cache.packets) {
-      setModel(new DataModel(device.cache.packets, weather))
+      if (device.cache.packets.length > 0) {
+        setModel(new DataModel(device.cache.packets, weather))
+      }
     }
   }, [device, weather])
 
