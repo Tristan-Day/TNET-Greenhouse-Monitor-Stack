@@ -113,15 +113,18 @@ export class DataModel
       .reverse()
   }
 
-  #extractDualDataset(monitoringProperty, weatherProperty, length) {
-    const weatherData = this.#extractWeatherDataset(weatherProperty)
-    const monitoringData = this.#extractMonitoringDataset(monitoringProperty, length)
+  #extractDualDataset(a, b, length) {
+    const weatherData =
+      this.#extractWeatherDataset(b)
+
+    const monitoringData =
+      this.#extractMonitoringDataset(a, length)
 
     return monitoringData.map(datapoint => {
       const outdoor = findNearestNeighbor(
         datapoint.timestamp, weatherData, 3600000)
       return {
-        outdoor: outdoor.value || null, indoor: datapoint.value,
+        outdoor: outdoor.value, indoor: datapoint.value,
         timestamp: datapoint.timestamp
       }
     })
