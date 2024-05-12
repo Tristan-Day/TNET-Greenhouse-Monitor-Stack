@@ -7,24 +7,33 @@ import {
   Typography,
   IconButton,
   Divider,
+  Tabs,
+  Tab,
   Card,
   Grow,
   Alert,
   useTheme
 } from '@mui/material'
+import { TuneOutlined, BarChart, Thermostat } from '@mui/icons-material'
 
-import { TuneOutlined } from '@mui/icons-material'
-import { LineChart } from '@mui/x-charts'
+import {
+  getMonitoringData,
+  getWeatherData,
+  getColourCode,
+  DataModel
+} from './logic/Data'
 
-import { Flex } from './component'
+import {
+  Flex,
+  ValueCard,
+  GaugeCard,
+  ChartCard,
+  Loading
+} from './component'
+
 import { TransmitterIcon } from './component/icon/TransmitterIcon'
-
+import { ConfigurationRoutes } from './subpage/configuration/'
 import { WindowContext } from './Navigation'
-import Loading from './Loading'
-
-import Configuration from './subpage/Configuration'
-import { getMonitoringData, getWeatherData, DataModel } from './logic/Data'
-import strftime from 'strftime'
 
 function Header({ device }) 
 {
@@ -34,7 +43,7 @@ function Header({ device })
   const theme = useTheme()
 
   return (
-    <Flex sx={{ margin: '1.2rem 1rem 1.2rem 1rem' }}>
+    <Flex sx={{ margin: '1rem' }}>
       <Flex sx={{ marginRight: 'auto', gap: '1rem' }}>
         {!isMobileView && (
           <TransmitterIcon fill={theme.palette.text.primary} size={60} />
@@ -42,14 +51,22 @@ function Header({ device })
         {isMobileView ? (
           <Flex sx={{ alignItems: 'center' }}>
             <Box sx={{ width: '50vw' }}>
-              <Typography variant="h6">Device Dashboard</Typography>
+              <Typography variant="h6">
+                {(device.configuration.nicknames &&
+                  device.configuration.nicknames.device) ||
+                  'Device Dashboard'}
+              </Typography>
               <Typography noWrap>{device.ID || 'Loading...'}</Typography>
             </Box>
           </Flex>
         ) : (
           <Flex sx={{ alignItems: 'center' }}>
             <Box>
-              <Typography variant="h6">Device Dashboard</Typography>
+              <Typography variant="h6">
+                {(device.configuration.nicknames &&
+                  device.configuration.nicknames.device) ||
+                  'Device Dashboard'}
+              </Typography>
               <Typography>{device.ID || 'Loading...'}</Typography>
             </Box>
           </Flex>
@@ -78,56 +95,136 @@ function Header({ device })
   )
 }
 
-function LiveData({ model }) 
+function Footer({ tab, setTab }) 
 {
-  const DataCard = ({ name, units, value }) => 
-  {
-    return (
-      <Card className="DataCard">
-        <Flex sx={{ gap: '4px', marginLeft: (units && units.length) || 0 }}>
-          <Typography variant="h5">{value}</Typography>
-          <Typography variant="caption">{units}</Typography>
-        </Flex>
-        <Typography>{name}</Typography>
-      </Card>
-    )
-  }
-
-  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
-
-  const flexDirection = isMobileView ? 'column' : 'row'
-  const flexSpacing = isMobileView ? '1rem' : '2rem'
+  const theme = useTheme()
 
   return (
-    <Flex direction={flexDirection} sx={{ gap: flexSpacing, flexWrap: 'wrap' }}>
-      <DataCard
-        name="Temperature"
-        units="°C"
+    <Tabs
+      className="Footer"
+      centered
+      sx={{
+        backgroundColor: theme.palette.background.default,
+        padding: "0rem 1rem 0rem 1rem",
+        borderColor: theme.palette.divider
+      }}
+      value={tab}
+      onChange={(_, value) => {
+        setTab(value)
+      }}
+      variant="fullWidth"
+    >
+      <Tab icon={<Thermostat />} label={'Live Data'}/>
+      <Tab icon={<BarChart />} label={'Data Charts'}/>
+    </Tabs>
+  )
+}
+
+function CurrentData({ model, configuration }) 
+{
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
+  const spacing = isMobileView ? '1.2rem' : '2rem'
+
+  return (
+    <Flex direction="row" sx={{ gap: spacing, flexWrap: 'wrap' }}>
+      <ValueCard
+        name="Temperature" units="°C"
+        colour={getColourCode(
+          model.getLatestValue('Temperature') +
+            parseFloat(
+              configuration.calibrations &&
+                configuration.calibrations.temperature
+                ? configuration.calibrations.temperature
+                : 0
+            )
+        )}
         value={model.getLatestValue('Temperature')}
       />
-      <DataCard
-        name="Humidity"
-        units="%"
+      <ValueCard
+        name="Humidity" units="%"
         value={model.getLatestValue('Humidity')}
       />
-      <DataCard
-        name="Pressure"
-        units="kPa"
-        value={Math.round(model.getLatestValue('Pressure') * 0.001)}
-      />
-      <DataCard
-        name="Soil Sensor A"
+      <GaugeCard
+        name={
+          (configuration.nicknames &&
+            configuration.nicknames.sensors &&
+            'Moisture Sensor - ' + configuration.nicknames.sensors.A) ||
+          'Soil Sensor A'
+        }
         value={model.getLatestValue('SoilMoisturePrimary')}
+        min={
+          (configuration.calibrations &&
+            configuration.calibrations.moisture &&
+            configuration.calibrations.moisture.min) ||
+          undefined
+        }
+        max={
+          (configuration.calibrations &&
+            configuration.calibrations.moisture &&
+            configuration.calibrations.moisture.max) ||
+          undefined
+        }
       />
-      <DataCard
-        name="Soil Sensor B"
+      <GaugeCard
+        name={
+          (configuration.nicknames &&
+            configuration.nicknames.sensors &&
+            'Moisture Sensor - ' + configuration.nicknames.sensors.B) ||
+          'Soil Sensor B'
+        }
         value={model.getLatestValue('SoilMoistureSecondary')}
+        min={
+          (configuration.calibrations &&
+            configuration.calibrations.moisture &&
+            configuration.calibrations.moisture.min) ||
+          undefined
+        }
+        max={
+          (configuration.calibrations &&
+            configuration.calibrations.moisture &&
+            configuration.calibrations.moisture.max) ||
+          undefined
+        }
+      />
+      <ValueCard
+        name="Peak Temperature" units="°C"
+        colour={getColourCode(
+          model.getHighestValue('Temperature') +
+            parseFloat(
+              configuration.calibrations &&
+                configuration.calibrations.temperature
+                ? configuration.calibrations.temperature
+                : 0
+            )
+        )}
+        value={model.getHighestValue('Temperature')}
+      />
+      <ValueCard
+        name="Peak Humidity" units="%"
+        value={model.getHighestValue('Humidity')}
+      />
+      <ValueCard
+        name="Lowest Temperature" units="°C"
+        colour={getColourCode(
+          model.getLowestValue('Temperature') +
+            parseFloat(
+              configuration.calibrations &&
+                configuration.calibrations.temperature
+                ? configuration.calibrations.temperature
+                : 0
+            )
+        )}
+        value={model.getLowestValue('Temperature')}
+      />
+      <ValueCard
+        name="Lowest Humidity" units="%"
+        value={model.getLowestValue('Humidity')}
       />
     </Flex>
   )
 }
 
-function ChartData({ model }) 
+function HistoricalData({ model, configuration }) 
 {
   const [viewport, setViewport] = useState({
     width: window.innerWidth
@@ -146,50 +243,16 @@ function ChartData({ model })
     }
   }, [])
 
-  const ChartCard = ({ dataset, series, legend }) => 
-  {
-    const props = legend
-      ? {
-          legend: {
-            padding: { top: -10 },
-            itemGap: 20, markGap: 10
-          }
-        }
-      : {
-          legend: {
-            hidden: true,
-          }
-        }
-
-    return (
-      <LineChart
-        slotProps={props}
-        sx={{paddingTop: legend ? '0.6rem' : 0}}
-        xAxis={[
-          {
-            dataKey: 'timestamp',
-            valueFormatter: value => {
-              return require('strftime')('%H:%M', new Date(value))
-            }
-          }
-        ]}
-        series={series} dataset={dataset}
-        margin={{ bottom: 30, top: legend ? 42 : 20 }}
-        skipAnimation
-      />
-    )
-  }
-
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
-  const flexSpacing = isMobileView ? '1rem' : '2rem'
+  const spacing = isMobileView ? '1.2rem' : '2rem'
 
   // Determine the number of points to show
   const length = viewport.width * 0.025
 
   return (
-    <Flex sx={{ flexWrap: 'wrap', gap: flexSpacing, justifyContent: 'center' }}>
+    <Flex sx={{ flexWrap: 'wrap', gap: spacing, justifyContent: 'center' }}>
       <Card className="ChartCard">
-        <Typography variant='h6'>Temperature (°C)</Typography>
+        <Typography variant="overline">Temperature (°C)</Typography>
         {model.includesWeatherData() ? (
           <ChartCard
             dataset={model.getDataset('Temperature', length)}
@@ -207,7 +270,7 @@ function ChartData({ model })
         )}
       </Card>
       <Card className="ChartCard">
-        <Typography variant='h6'>Humidity (%)</Typography>
+        <Typography variant="overline">Humidity (%)</Typography>
         {model.includesWeatherData() ? (
           <ChartCard
             dataset={model.getDataset('Humidity', length)}
@@ -225,23 +288,24 @@ function ChartData({ model })
         )}
       </Card>
       <Card className="ChartCard">
-        <Typography variant='h6'>Pressure (kPa)</Typography>
-        <ChartCard
-          dataset={model.getDataset('Pressure', length).map(datapoint => {
-            return { ...datapoint, value: datapoint.value * 0.001 }
-          })}
-          series={[{ dataKey: 'value', label: 'Pressure kPa' }]}
-        />
-      </Card>
-      <Card className="ChartCard">
-        <Typography variant='h6'>Soil Sensor A</Typography>
+        <Typography variant="overline">
+          {(configuration.nicknames &&
+            configuration.nicknames.sensors &&
+            'Moisture Sensor - ' + configuration.nicknames.sensors.A) ||
+            'Soil Sensor A'}
+        </Typography>
         <ChartCard
           dataset={model.getDataset('SoilMoisturePrimary', length)}
           series={[{ dataKey: 'value', label: 'Soil Sensor A' }]}
         />
       </Card>
       <Card className="ChartCard">
-        <Typography variant='h6'>Soil Sensor B</Typography>
+        <Typography variant="overline">
+          {(configuration.nicknames &&
+            configuration.nicknames.sensors &&
+            'Moisture Sensor - ' + configuration.nicknames.sensors.B) ||
+            'Soil Sensor B'}
+        </Typography>
         <ChartCard
           dataset={model.getDataset('SoilMoistureSecondary', length)}
           series={[{ dataKey: 'value', label: 'Soil Sensor B' }]}
@@ -260,6 +324,8 @@ function Dashboard()
   const [device, setDevice] = useState()
 
   const [message, setMessage] = useState(false)
+  const [tab, setTab] = useState(0)
+
   const [timers, setTimers] = useState({})
   const [model, setModel] = useState()
 
@@ -317,51 +383,84 @@ function Dashboard()
       })
   }
 
+  // Check for any alarms
   const refreshAlertData = () => {
-    if (!device.configuration || !device.configuration.thresholds) {
+    // Check if the device has ceased transmision
+    if (!model) {
       return
     }
 
-    const thresholds = device.configuration.thresholds
-    setMessage(undefined)
+    if (new Date() - model.getTimestamp() > 30 * 60 * 1000) {
+      setMessage({
+        severity: 'warning',
+        text: `Your device has not transmitted data in the last thirty minutes`
+      })
+      return
+    }
 
-    if (thresholds['temperature']) {
-      if (
-        parseFloat(thresholds['temperature']) < model.getLatestValue('Temperature')
-      ) {
-        const difference = (
-          model.getLatestValue('Temperature') - thresholds['temperature']).toPrecision(2)
-        setMessage({
-          severity: 'warning',
-          text: `Greenhouse temperature is ${difference}°C above alert threshold`
-        })
+    // Check for out-of-bounds values
+    if (!device.configuration || !device.configuration.alerts) {
+      return
+    }
+
+    let alerts = []
+
+    Object.entries(device.configuration.alerts).forEach(([name, configuration]) => {
+      if (!configuration.enabled) {
+        return
       }
-    } 
-    else if (thresholds['humidity']) {
-      if (
-        parseFloat(thresholds['humidity']) < model.getLatestValue('Humidity').toPrecision(2)
-      ) {
-        const difference = Math.round(
-          model.getLatestValue('Humidity') - thresholds['humidity']
-        )
-        setMessage({
-          severity: 'warning',
-          text: `Greenhouse humidity is ${difference}% above alert threshold`
-        })
+
+      if (configuration.min) 
+        { 
+        const minimum = parseFloat(configuration.min)
+        const value = model.getLatestValue(name)
+
+        if (minimum > value) {
+          alerts.push(
+            `${name.charAt(0).toUpperCase() + name.slice(1)} is ${
+              (minimum - value).toPrecision(2)
+            }${configuration.units ? configuration.units : ''} below target`
+          )
+        }
       }
+
+      if (configuration.max) 
+        { 
+        const maximum = parseFloat(configuration.max)
+        const value = model.getLatestValue(name)
+
+        if (maximum < value) {
+          alerts.push(
+            `${name.charAt(0).toUpperCase() + name.slice(1)} is ${
+              (value - maximum).toPrecision(2)
+            }${configuration.units ? configuration.units : ''} above target`
+          )
+        }
+      }
+    })
+
+    // Data alerts should not overwrite any errors or warnings
+    if (!message && alerts.length) {
+      setMessage({ severity: 'warning', text: alerts.at(0) })
     }
   }
 
   // Set the window title and import data from localstorage
-  useEffect(() => {
+  useEffect(() => {   
     windowContext.setWindow({ title: 'Greenhouse Monitor' })
+
+    let data = JSON.parse(localStorage.getItem(identifier) || '{}')
+    if (!data.hasOwnProperty('configuration')) {
+      data = { ...data, configuration: {} }
+    }
 
     setDevice({
       ID: identifier,
-      ...JSON.parse(localStorage.getItem(identifier))
+      ...data
     })
   }, [identifier])
 
+  // Pull data from the cloud and create timers
   useEffect(() => {
     if (!device) {
       return
@@ -385,57 +484,73 @@ function Dashboard()
   }, [device])
 
   useEffect(() => {
-    if (device && device.cache) {
-      const time = strftime('%F at %H:%M', new Date(device.cache.timestamp))
-      windowContext.setWindow({
-        title: 'Greenhouse Monitor',
-        message: `Last Updated: ${time}`
-      })
+    if (!device || !device.cache) {
+      return
     }
 
-    if (device && device.cache && device.cache.packets) {
-      if (device.cache.packets.length > 0) {
-        setModel(new DataModel(device.cache.packets, weather))
-      }
+    if (!device.cache || !device.cache.packets.length) {
+      return
     }
+
+    const model = new DataModel(device.cache.packets, weather)
+    setModel(model); refreshAlertData()
+
+    windowContext.setWindow({
+      ...windowContext.window,
+      message: `Last Updated: ${model.getFormattedTimestamp()}`
+    })
   }, [device, weather])
 
-  useEffect(() => {
-    if (model) {
-      refreshAlertData()
-    }
-  }, [model])
-
-  if (!model) {
+  if (!device || !model) {
     return <Loading text="Loading Monitoring Data" />
   }
 
   const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
-  const spacing = isMobileView ? '1rem' : '2rem'
+  const spacing = isMobileView ? '1.2rem' : '2rem'
 
   return (
     <Flex direction="column" grow={1}>
       <Header device={device} />
       <Divider />
       <Flex direction="column" grow={1} sx={{ margin: spacing, gap: spacing }}>
+        {isMobileView && (
+          <Flex sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h6">Current Conditions</Typography>
+            <Typography variant="body">
+              {model.getFormattedTimestamp()}
+            </Typography>
+          </Flex>
+        )}
         {message && (
           <Grow in>
             <Alert severity={message.severity}>{message.text}</Alert>
           </Grow>
         )}
-        <LiveData model={model}/>
-        <Divider />
-        <ChartData model={model} />
+        {!isMobileView && (
+          <>
+            <CurrentData model={model} configuration={device.configuration} />
+            <Divider />
+            <HistoricalData model={model} configuration={device.configuration} />
+          </>
+        )}
+        {isMobileView &&
+          (tab ? (
+            <HistoricalData model={model} configuration={device.configuration} />
+          ) : (
+            <CurrentData model={model} configuration={device.configuration} />
+          ))}
       </Flex>
+      {isMobileView && <Footer tab={tab} setTab={setTab} />}
     </Flex>
   )
 }
 
-export default function DashboardRoutes() {
+export default function DashboardRoutes()
+{
   return (
     <Route path="devices">
       <Route path=":identifier" element={<Dashboard />} />
-      <Route path=":identifier/configuration" element={<Configuration />} />
+      {ConfigurationRoutes()}
     </Route>
   )
 }

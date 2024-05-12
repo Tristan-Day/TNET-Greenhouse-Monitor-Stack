@@ -12,10 +12,9 @@ import {
 } from '@mui/material'
 import { DeviceHub, InfoRounded } from '@mui/icons-material'
 
-import { Flex } from '../../component'
+import { Flex, Loading } from '../../component'
 import { AccountIcon } from '../../component/icon/AccountIcon'
 
-import Loading from '../../Loading'
 import Devices from './Devices'
 import Legal from './Legal'
 
@@ -37,7 +36,7 @@ function Header()
   const theme = useTheme()
 
   return (
-    <Flex sx={{ margin: '1.2rem 1rem 1.2rem 1rem' }}>
+    <Flex sx={{ margin: '1rem' }}>
       <Flex sx={{ marginRight: 'auto', gap: '1rem' }}>
         {!isMobileView && (
           <AccountIcon fill={theme.palette.text.primary} size={60} />

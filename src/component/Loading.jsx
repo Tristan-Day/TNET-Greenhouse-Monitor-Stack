@@ -1,7 +1,7 @@
 import { Typography, Backdrop, CircularProgress } from '@mui/material'
 
-import { Flex } from './component'
-import { MonitoringIcon } from './component/icon/MonitoringIcon'
+import { MonitoringIcon } from './icon/MonitoringIcon'
+import { Flex } from '.'
 
 export default function Loading({ text }) 
 {
