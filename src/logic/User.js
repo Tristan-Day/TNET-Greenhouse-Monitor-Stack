@@ -1,11 +1,13 @@
 import { getCurrentUser } from 'aws-amplify/auth'
 import { get, put } from 'aws-amplify/api'
 
-function getResponseCode(error) {
+function getResponseCode(error)
+{
   return error.$metadata.httpStatusCode
 }
 
-export async function getUserData() {
+export async function getUserData()
+{
   const user = await getCurrentUser()
 
   const operation = get({
@@ -17,7 +19,8 @@ export async function getUserData() {
     const response = await operation.response
     return (await response.body.json())
   } 
-  catch (error) {
+  catch (error)
+  {
     switch (getResponseCode(error)) 
     {
       case 404:
@@ -29,7 +32,8 @@ export async function getUserData() {
   }
 }
 
-export async function registerDevice(identifier, code) {
+export async function registerDevice(identifier, code)
+{
   const user = await getCurrentUser()
 
   const operation = put({
@@ -41,7 +45,8 @@ export async function registerDevice(identifier, code) {
   try {
     await operation.response
   }
-  catch (error) {
+  catch (error)
+  {
     switch (getResponseCode(error)) 
     {
       case 409:

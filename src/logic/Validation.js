@@ -13,7 +13,14 @@ export function isValidIdentifier(string)
 }
 
 // Determine if a given string is a valid float
-export function isValidFloat(string)
+export function isFloat(string)
+{
+  return /^-?(0|[1-9]\d*)(\.\d+)?$/.test(string)
+}
+
+// Determine if a given string is a positive float
+export function isPositiveFloat(string)
 {
   return /^(0|[1-9]\d*)(\.\d+)?$/.test(string)
 }
+

@@ -9,9 +9,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 import { getUserData } from './logic/User'
 import { Navigation } from './Navigation'
 
-import Loading from './Loading'
-import DashboardRoutes from './Dashboard'
+import Loading from './component/Loading'
 import SettingsRoutes from './subpage/settings'
+import DashboardRoutes from './Dashboard'
 
 let theme = {
   palette: { mode: 'light', contrastThreshold: 4.5 }
