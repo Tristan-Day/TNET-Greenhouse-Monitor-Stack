@@ -309,55 +309,51 @@ function Dashboard()
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 
-  const [messages, setMessages] = useState([])
   const [tab, setTab] = useState(0)
+  const [messages, setMessages] = useState([])
 
-  const [weather, setWeather] = useState()
   const [device, setDevice] = useState()
-
-  const [timer, setTimer] = useState()
   const [model, setModel] = useState()
 
-  // Handle to get monitoring data from DynamoDB
-  const refreshMonitoringData = () => {
-    if (device?.cache) {
-      if (new Date().getTime() - device.cache.timestamp < 60000) {
-        if (device.cache.packets) {
-          return
-        }
-      }
+ 
+  const refreshMonitoringData = async () => 
+  {
+    setMessages([])
+
+    // Handle get monitoring data from DynamoDB
+    let monitoringData = []
+
+    try {
+      monitoringData = await getMonitoringData(identifier)
     }
-
-    getMonitoringData(identifier)
-      .then(result => {
-        // Cache the result in local storage
-        const cache = { timestamp: new Date().getTime(), packets: result }
-        localStorage.setItem(identifier + '/cache', JSON.stringify(cache))
-        setDevice({ ...device, cache: cache })
-      })
-      .catch(error => {
-        setMessages([
-          ...messages,
-          {
-            severity: 'error',
-            text: error.message
-          }
-        ])
-      })
-  }
-
-  // Handle to get weather data from OpenMetro
-  const refreshWeatherData = () => {
-    if (!device?.configuration?.location) {
+    catch (error) {
+      setMessages([
+        ...messages,
+        {
+          severity: 'error',
+          text: error.message
+        }
+      ])
       return
     }
-    const location = device.configuration.location
 
-    getWeatherData(location.lat, location.lon)
-      .then(async response => {
+    const configuration = JSON.parse(
+      localStorage.getItem(identifier + '/configuration') || '{}'
+    )
+
+    // Handle to get weather data from OpenMetro
+    try {
+      const location = configuration?.location
+
+      if (location) {
+        const response = await getWeatherData(location.lat, location.lon)
+
         if (response.ok) {
-          setWeather((await response.json()).hourly)
-        } else {
+          setModel(new DataModel(monitoringData, (await response.json()).hourly))
+          return
+        }
+        else
+        {
           setMessages([
             ...messages,
             {
@@ -366,16 +362,19 @@ function Dashboard()
             }
           ])
         }
-      })
-      .catch(() => {
-        setMessages([
-          ...messages,
-          {
-            severity: 'error',
-            text: 'Failed to retreive weather data'
-          }
-        ])
-      })
+      }
+    }
+    catch {
+      setMessages([
+        ...messages,
+        {
+          severity: 'error',
+          text: 'Failed to retreive weather data'
+        }
+      ])
+    }
+
+    setModel(new DataModel(monitoringData))
   }
 
   // Handle to process data and show any alerts
@@ -390,7 +389,6 @@ function Dashboard()
 
   // Interval hooks to periodically refresh data
   useInterval(refreshMonitoringData, 660000)
-  useInterval(refreshWeatherData, 3600000)
   useInterval(refreshAlertData, 10000)
 
   // Effect hook to set the window title and import data from localstorage
@@ -398,36 +396,26 @@ function Dashboard()
     windowContext.setWindow({ title: 'Greenhouse Monitor' })
 
     setDevice({
-      cache: JSON.parse(localStorage.getItem(identifier + '/cache') || '{}'),
       configuration: JSON.parse(
         localStorage.getItem(identifier + '/configuration') || '{}'
       ),
       ID: identifier
     })
+
+    refreshMonitoringData()
   }, [identifier])
 
   // Effect hook to process data from localstorage
   useEffect(() => {
-    if (device?.cache?.packets?.length > 0) {
-      setModel(new DataModel(device.cache.packets, weather))
-    }
-
     windowContext.setWindow({
       ...windowContext.window,
       message: `Last Transmission: ${model?.getFormattedTimestamp() || '-'}`
     })
 
-    // Has data been loaded from localstorage?
-    if (device?.configuration && !timer) {
-      setTimer(true); refreshMonitoringData()
-      refreshWeatherData()
-    }
-
-    // Have the refresh handles run once?
-    if (device?.configuration && timer && model) {
+    if (device?.configuration && model) {
       refreshAlertData()
     }
-  }, [device, weather])
+  }, [model])
 
   // Only show the dashboard once the model is loaded
   if (!device?.configuration || !model) {

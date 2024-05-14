@@ -57,9 +57,7 @@ export class DataModel
 
     return monitoringData.map(datapoint => {
       const outdoor = findNearestDatapoint(
-        datapoint.timestamp,
-        weatherData,
-        3600000
+        datapoint.timestamp, weatherData, 3600000
       )
 
       if (outdoor && outdoor.value)
