@@ -6,12 +6,12 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { CssBaseline } from '@mui/material'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
-import { getUserData } from './logic/User'
+import { getUserData } from './common/logic/User'
 import { Navigation } from './Navigation'
 
-import Loading from './component/Loading'
-import SettingsRoutes from './subpage/settings'
-import DashboardRoutes from './Dashboard'
+import Loading from './common/component/Loading'
+import SettingsRoutes from './page/settings'
+import DashboardRoutes from './dashboard/Dashboard'
 
 let theme = {
   palette: { mode: 'light', contrastThreshold: 4.5 }

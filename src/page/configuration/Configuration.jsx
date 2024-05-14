@@ -1,16 +1,17 @@
 import { useEffect, useContext, useState, createContext } from 'react'
 import { useParams, useNavigate, Route, Outlet } from 'react-router-dom'
 
-import {
-  Button,
+import 
+{
+  Button, 
   Divider,
   Tab,
-  Tabs,
-  useTheme
+  Tabs, 
+  useTheme 
 } from '@mui/material'
 import { SettingsOutlined, NotificationsOutlined } from '@mui/icons-material'
 
-import { Flex, Loading } from '../../component'
+import { Flex, Loading } from '../../common/component'
 import { WindowContext } from '../../Navigation'
 
 import GeneralConfiguration from './General'
@@ -25,8 +26,7 @@ function Footer({ handleClose, handleSave })
       className="Footer"
       sx={{
         backgroundColor: theme.palette.background.default,
-        borderColor: theme.palette.divider,
-        padding: "1.2rem"
+        borderColor: theme.palette.divider, padding: '1.2rem'
       }}
     >
       <Button
@@ -61,11 +61,10 @@ function Configuration()
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 
+  const [configuration, setConfiguration] = useState()
   const [tab, setTab] = useState(0)
-  const navigate = useNavigate()
 
-  const [configuration, setConfiguration] = useState({})
-  const [device, setDevice] = useState({})
+  const navigate = useNavigate()
 
   const Contents = ConfigurationContents.map((entry, index) => {
     return <Tab key={index} label={entry.name} icon={entry.icon} />
@@ -82,8 +81,7 @@ function Configuration()
 
   const handleSave = () => {
     localStorage.setItem(
-      identifier,
-      JSON.stringify({ ...device, configuration: configuration })
+      identifier + '/configuration', JSON.stringify(configuration)
     )
   }
 
@@ -92,23 +90,24 @@ function Configuration()
     windowContext.setWindow({ title: 'Device Configuration' })
   }, [])
 
-  // Update device with contents from local storage
+  // Load the current configuration from local storage
   useEffect(() => {
     if (!identifier) {
       return
     }
-    setDevice({
-      ID: identifier,
-      ...JSON.parse(localStorage.getItem(identifier))
-    })
-    setConfiguration(JSON.parse(localStorage.getItem(identifier)).configuration)
+    setConfiguration(
+      JSON.parse(
+        localStorage.getItem(identifier + '/configuration'
+      ) || '{}')
+    )
   }, [identifier])
 
-  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
-
-  if (!device.ID) {
+  // Only show once the configuration is loaded
+  if (!configuration) {
     return <Loading text="Loading Device Configuration" />
   }
+
+  const isMobileView = /iPhone|iPod|Android/i.test(navigator.userAgent)
 
   return (
     <Flex direction="column" grow={1}>
@@ -116,7 +115,7 @@ function Configuration()
       <Flex direction={isMobileView ? 'column' : 'inline'} grow={1}>
         {isMobileView ? (
           <>
-            <Tabs orientation={'hoizontal'} value={tab} onChange={switchTab}>
+            <Tabs orientation={'horizontal'} value={tab} onChange={switchTab}>
               {Contents}
             </Tabs>
             <Divider flexItem orientation={'horizontal'} />
@@ -140,8 +139,7 @@ function Configuration()
   )
 }
 
-export default function ConfigurationRoutes()
-{
+export default function ConfigurationRoutes() {
   return (
     <Route path=":identifier/configuration" element={<Configuration />}>
       <Route path="*" element={<GeneralConfiguration />} />

@@ -22,6 +22,7 @@ import {
   getColourCode,
   DataModel
 } from './logic/Data'
+import { getAlerts } from './logic/Alerts'
 
 import {
   Flex,
@@ -29,11 +30,12 @@ import {
   GaugeCard,
   ChartCard,
   Loading
-} from './component'
+} from '../common/component'
+import { useInterval } from '../common/Interval'
 
-import { TransmitterIcon } from './component/icon/TransmitterIcon'
-import { ConfigurationRoutes } from './subpage/configuration/'
-import { WindowContext } from './Navigation'
+import { TransmitterIcon } from '../common/component/icon/TransmitterIcon'
+import { ConfigurationRoutes } from '../page/configuration'
+import { WindowContext } from '../Navigation'
 
 function Header({ device }) 
 {
@@ -52,8 +54,7 @@ function Header({ device })
           <Flex sx={{ alignItems: 'center' }}>
             <Box sx={{ width: '50vw' }}>
               <Typography variant="h6">
-                {(device.configuration.nicknames &&
-                  device.configuration.nicknames.device) ||
+                {(device.configuration.nicknames?.device) ||
                   'Device Dashboard'}
               </Typography>
               <Typography noWrap>{device.ID || 'Loading...'}</Typography>
@@ -63,8 +64,7 @@ function Header({ device })
           <Flex sx={{ alignItems: 'center' }}>
             <Box>
               <Typography variant="h6">
-                {(device.configuration.nicknames &&
-                  device.configuration.nicknames.device) ||
+                {(device.configuration.nicknames?.device) ||
                   'Device Dashboard'}
               </Typography>
               <Typography>{device.ID || 'Loading...'}</Typography>
@@ -132,8 +132,7 @@ function CurrentData({ model, configuration })
         colour={getColourCode(
           model.getLatestValue('Temperature') +
             parseFloat(
-              configuration.calibrations &&
-                configuration.calibrations.temperature
+              configuration.calibrations?.temperature
                 ? configuration.calibrations.temperature
                 : 0
             )
@@ -146,42 +145,36 @@ function CurrentData({ model, configuration })
       />
       <GaugeCard
         name={
-          (configuration.nicknames &&
-            configuration.nicknames.sensors &&
+          (configuration.nicknames?.sensors?.A &&
             'Moisture Sensor - ' + configuration.nicknames.sensors.A) ||
           'Soil Sensor A'
         }
         value={model.getLatestValue('SoilMoisturePrimary')}
         min={
-          (configuration.calibrations &&
-            configuration.calibrations.moisture &&
+          (configuration.calibrations?.moisture &&
             configuration.calibrations.moisture.min) ||
           undefined
         }
         max={
-          (configuration.calibrations &&
-            configuration.calibrations.moisture &&
+          (configuration.calibrations?.moisture &&
             configuration.calibrations.moisture.max) ||
           undefined
         }
       />
       <GaugeCard
         name={
-          (configuration.nicknames &&
-            configuration.nicknames.sensors &&
+          (configuration.nicknames?.sensors?.B &&
             'Moisture Sensor - ' + configuration.nicknames.sensors.B) ||
           'Soil Sensor B'
         }
         value={model.getLatestValue('SoilMoistureSecondary')}
         min={
-          (configuration.calibrations &&
-            configuration.calibrations.moisture &&
+          (configuration.calibrations?.moisture &&
             configuration.calibrations.moisture.min) ||
           undefined
         }
         max={
-          (configuration.calibrations &&
-            configuration.calibrations.moisture &&
+          (configuration.calibrations?.moisture &&
             configuration.calibrations.moisture.max) ||
           undefined
         }
@@ -191,8 +184,7 @@ function CurrentData({ model, configuration })
         colour={getColourCode(
           model.getHighestValue('Temperature') +
             parseFloat(
-              configuration.calibrations &&
-                configuration.calibrations.temperature
+              configuration.calibrations?.temperature
                 ? configuration.calibrations.temperature
                 : 0
             )
@@ -208,8 +200,7 @@ function CurrentData({ model, configuration })
         colour={getColourCode(
           model.getLowestValue('Temperature') +
             parseFloat(
-              configuration.calibrations &&
-                configuration.calibrations.temperature
+              configuration.calibrations?.temperature
                 ? configuration.calibrations.temperature
                 : 0
             )
@@ -289,8 +280,7 @@ function HistoricalData({ model, configuration })
       </Card>
       <Card className="ChartCard">
         <Typography variant="overline">
-          {(configuration.nicknames &&
-            configuration.nicknames.sensors &&
+          {(configuration.nicknames?.sensors?.A &&
             'Moisture Sensor - ' + configuration.nicknames.sensors.A) ||
             'Soil Sensor A'}
         </Typography>
@@ -301,8 +291,7 @@ function HistoricalData({ model, configuration })
       </Card>
       <Card className="ChartCard">
         <Typography variant="overline">
-          {(configuration.nicknames &&
-            configuration.nicknames.sensors &&
+          {(configuration.nicknames?.sensors?.B &&
             'Moisture Sensor - ' + configuration.nicknames.sensors.B) ||
             'Soil Sensor B'}
         </Typography>
@@ -320,46 +309,46 @@ function Dashboard()
   const windowContext = useContext(WindowContext)
   let { identifier } = useParams()
 
+  const [messages, setMessages] = useState([])
+  const [tab, setTab] = useState(0)
+
   const [weather, setWeather] = useState()
   const [device, setDevice] = useState()
 
-  const [message, setMessage] = useState(false)
-  const [tab, setTab] = useState(0)
-
-  const [timers, setTimers] = useState({})
+  const [timer, setTimer] = useState()
   const [model, setModel] = useState()
 
-  // Get new monitoring data from DynamoDB
+  // Handle to get monitoring data from DynamoDB
   const refreshMonitoringData = () => {
-    if (device.cache) {
+    if (device?.cache) {
       if (new Date().getTime() - device.cache.timestamp < 60000) {
         if (device.cache.packets) {
           return
         }
       }
     }
-    getMonitoringData(device.ID)
+
+    getMonitoringData(identifier)
       .then(result => {
         // Cache the result in local storage
         const cache = { timestamp: new Date().getTime(), packets: result }
-
+        localStorage.setItem(identifier + '/cache', JSON.stringify(cache))
         setDevice({ ...device, cache: cache })
-        localStorage.setItem(
-          device.ID,
-          JSON.stringify({ ...device, cache: cache })
-        )
       })
       .catch(error => {
-        setMessage({
-          severity: 'error',
-          text: error.message
-        })
+        setMessages([
+          ...messages,
+          {
+            severity: 'error',
+            text: error.message
+          }
+        ])
       })
   }
 
-  // Get new weather data from OpenMetro
+  // Handle to get weather data from OpenMetro
   const refreshWeatherData = () => {
-    if (!device.configuration || !device.configuration.location) {
+    if (!device?.configuration?.location) {
       return
     }
     const location = device.configuration.location
@@ -369,139 +358,79 @@ function Dashboard()
         if (response.ok) {
           setWeather((await response.json()).hourly)
         } else {
-          setMessage({
-            severity: 'error',
-            text: 'Failed to retreive weather data'
-          })
+          setMessages([
+            ...messages,
+            {
+              severity: 'error',
+              text: 'Failed to retreive weather data'
+            }
+          ])
         }
       })
       .catch(() => {
-        setMessage({
-          severity: 'error',
-          text: 'Failed to retreive weather data'
-        })
+        setMessages([
+          ...messages,
+          {
+            severity: 'error',
+            text: 'Failed to retreive weather data'
+          }
+        ])
       })
   }
 
-  // Check for any alarms
-  const refreshAlertData = () => {
-    // Check if the device has ceased transmision
-    if (!model) {
-      return
-    }
-
-    if (new Date() - model.getTimestamp() > 30 * 60 * 1000) {
-      setMessage({
-        severity: 'warning',
-        text: `Your device has not transmitted data in the last thirty minutes`
-      })
-      return
-    }
-
-    // Check for out-of-bounds values
-    if (!device.configuration || !device.configuration.alerts) {
-      return
-    }
-
-    let alerts = []
-
-    Object.entries(device.configuration.alerts).forEach(([name, configuration]) => {
-      if (!configuration.enabled) {
-        return
-      }
-
-      if (configuration.min) 
-        { 
-        const minimum = parseFloat(configuration.min)
-        const value = model.getLatestValue(name)
-
-        if (minimum > value) {
-          alerts.push(
-            `${name.charAt(0).toUpperCase() + name.slice(1)} is ${
-              (minimum - value).toPrecision(2)
-            }${configuration.units ? configuration.units : ''} below target`
-          )
-        }
-      }
-
-      if (configuration.max) 
-        { 
-        const maximum = parseFloat(configuration.max)
-        const value = model.getLatestValue(name)
-
-        if (maximum < value) {
-          alerts.push(
-            `${name.charAt(0).toUpperCase() + name.slice(1)} is ${
-              (value - maximum).toPrecision(2)
-            }${configuration.units ? configuration.units : ''} above target`
-          )
-        }
-      }
-    })
-
-    // Data alerts should not overwrite any errors or warnings
-    if (!message && alerts.length) {
-      setMessage({ severity: 'warning', text: alerts.at(0) })
-    }
+  // Handle to process data and show any alerts
+  const refreshAlertData = async () => {
+    setMessages([
+      ...messages.filter(message => {
+        return message.type !== 'alert'
+      }),
+      ...await getAlerts(device.configuration, model)
+    ])
   }
 
-  // Set the window title and import data from localstorage
-  useEffect(() => {   
+  // Interval hooks to periodically refresh data
+  useInterval(refreshMonitoringData, 660000)
+  useInterval(refreshWeatherData, 3600000)
+  useInterval(refreshAlertData, 10000)
+
+  // Effect hook to set the window title and import data from localstorage
+  useEffect(() => {
     windowContext.setWindow({ title: 'Greenhouse Monitor' })
 
-    let data = JSON.parse(localStorage.getItem(identifier) || '{}')
-    if (!data.hasOwnProperty('configuration')) {
-      data = { ...data, configuration: {} }
-    }
-
     setDevice({
-      ID: identifier,
-      ...data
+      cache: JSON.parse(localStorage.getItem(identifier + '/cache') || '{}'),
+      configuration: JSON.parse(
+        localStorage.getItem(identifier + '/configuration') || '{}'
+      ),
+      ID: identifier
     })
   }, [identifier])
 
-  // Pull data from the cloud and create timers
+  // Effect hook to process data from localstorage
   useEffect(() => {
-    if (!device) {
-      return
+    if (device?.cache?.packets?.length > 0) {
+      setModel(new DataModel(device.cache.packets, weather))
     }
-
-    if (!timers.monitoringData) {
-      setTimers({...timers, monitoringData: true})
-
-      // Update weather data every 10 minutes
-      refreshMonitoringData()
-      setInterval(refreshMonitoringData, 660000)     
-    }
-
-    if (!timers.getWeatherData) {
-      setTimers({...timers, weatherData: true})
-
-      // Update weather data every 60 minutes
-      refreshWeatherData()
-      setInterval(refreshWeatherData, 3600000)      
-    }
-  }, [device])
-
-  useEffect(() => {
-    if (!device || !device.cache) {
-      return
-    }
-
-    if (!device.cache || !device.cache.packets.length) {
-      return
-    }
-
-    const model = new DataModel(device.cache.packets, weather)
-    setModel(model); refreshAlertData()
 
     windowContext.setWindow({
       ...windowContext.window,
-      message: `Last Updated: ${model.getFormattedTimestamp()}`
+      message: `Last Transmission: ${model?.getFormattedTimestamp() || '-'}`
     })
+
+    // Has data been loaded from localstorage?
+    if (device?.configuration && !timer) {
+      setTimer(true); refreshMonitoringData()
+      refreshWeatherData()
+    }
+
+    // Have the refresh handles run once?
+    if (device?.configuration && timer && model) {
+      refreshAlertData()
+    }
   }, [device, weather])
 
-  if (!device || !model) {
+  // Only show the dashboard once the model is loaded
+  if (!device?.configuration || !model) {
     return <Loading text="Loading Monitoring Data" />
   }
 
@@ -512,6 +441,7 @@ function Dashboard()
     <Flex direction="column" grow={1}>
       <Header device={device} />
       <Divider />
+
       <Flex direction="column" grow={1} sx={{ margin: spacing, gap: spacing }}>
         {isMobileView && (
           <Flex sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
@@ -521,21 +451,36 @@ function Dashboard()
             </Typography>
           </Flex>
         )}
-        {message && (
-          <Grow in>
-            <Alert severity={message.severity}>{message.text}</Alert>
-          </Grow>
+
+        {messages.length > 0 && (
+          <Flex direction={isMobileView ? 'column' : 'row'} sx={{ gap: '0.7rem' }}>
+            {messages.slice(0, Math.min(messages.length, 5)).map(message => (
+              <Grow in key={message.text}>
+                <Alert severity={message.severity} sx={{ flexGrow: 1 }}>
+                  {message.text}
+                </Alert>
+              </Grow>
+            ))}
+          </Flex>
         )}
+
         {!isMobileView && (
           <>
             <CurrentData model={model} configuration={device.configuration} />
             <Divider />
-            <HistoricalData model={model} configuration={device.configuration} />
+            <HistoricalData
+              model={model}
+              configuration={device.configuration}
+            />
           </>
         )}
+
         {isMobileView &&
           (tab ? (
-            <HistoricalData model={model} configuration={device.configuration} />
+            <HistoricalData
+              model={model}
+              configuration={device.configuration}
+            />
           ) : (
             <CurrentData model={model} configuration={device.configuration} />
           ))}

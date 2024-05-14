@@ -15,12 +15,12 @@ import {
 } from '@mui/material'
 import { Add } from '@mui/icons-material'
 
-import { Flex } from '../../component'
-import { MonitoringIcon } from '../../component/icon/MonitoringIcon'
+import { Flex } from '../../common/component'
+import { MonitoringIcon } from '../../common/component/icon/MonitoringIcon'
 
 import { AccountContext } from '../../App'
-import { isValidIdentifier } from '../../logic/Validation'
-import { registerDevice } from '../../logic/User'
+import { isValidIdentifier } from '../../common/logic/Validation'
+import { registerDevice } from '../../common/logic/User'
 
 function RegistrationDialog({ dialogState }) 
 {

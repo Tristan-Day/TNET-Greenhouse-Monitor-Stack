@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 
 import {
   Typography,
@@ -10,8 +10,8 @@ import {
   InputAdornment,
 } from '@mui/material'
 
-import { Flex } from '../../component'
-import { isValidPostcode, isPositiveFloat, isFloat } from '../../logic/Validation'
+import { Flex } from '../../common/component'
+import { isPositiveFloat, isFloat, isValidPostcode } from '../../common/logic/Validation'
 import { ConfigurationContext } from './Configuration'
 
 function NicknameConfiguration({ configuration, setConfiguration })
@@ -40,6 +40,7 @@ function NicknameConfiguration({ configuration, setConfiguration })
         ...configuration,
         nicknames: nicknames
       })
+      setMessage(undefined)
       return
     }
 
@@ -63,12 +64,17 @@ function NicknameConfiguration({ configuration, setConfiguration })
       ...configuration,
       nicknames: nicknames
     })
+    setMessage(undefined)
   }
+
+  useEffect(() => {
+    handleSubmit()
+  }, [nicknames])
 
   return (
     <Flex direction="column">
       <Box sx={{ marginBottom: '1.5rem' }}>
-        <Typography variant="h5">Nicknames</Typography>
+        <Typography variant="h6">Nicknames</Typography>
         <Typography>Set device and sensor nicknames</Typography>
       </Box>
 
@@ -80,14 +86,11 @@ function NicknameConfiguration({ configuration, setConfiguration })
         </Box>
       )}
 
-      <Flex direction="column" sx={{ gap: '1rem' }}>
+      <Flex direction="column" sx={{ gap: '1.5rem' }}>
         <TextField
           label="Device Name"
           onChange={event => {
             setNicknames({ ...nicknames, device: event.target.value })
-          }}
-          onBlur={() => {
-            handleSubmit()
           }}
           value={nicknames.device ? nicknames.device : ''}
         />
@@ -99,9 +102,6 @@ function NicknameConfiguration({ configuration, setConfiguration })
               sensors: { ...nicknames.sensors, A: event.target.value }
             })
           }}
-          onBlur={() => {
-            handleSubmit()
-          }}
           value={nicknames.sensors ? nicknames.sensors.A : ''}
         />
         <TextField
@@ -111,9 +111,6 @@ function NicknameConfiguration({ configuration, setConfiguration })
               ...nicknames,
               sensors: { ...nicknames.sensors, B: event.target.value }
             })
-          }}
-          onBlur={() => {
-            handleSubmit()
           }}
           value={nicknames.sensors ? nicknames.sensors.B : ''}
         />
@@ -173,7 +170,7 @@ function ForecastIntegration({ configuration, setConfiguration })
   return (
     <Flex direction="column">
       <Box sx={{ marginBottom: '1.5rem' }}>
-        <Typography variant="h5">Weather Integration</Typography>
+        <Typography variant="h6">Weather Integration</Typography>
         <Typography>Set a location to enable forecast integration</Typography>
       </Box>
 
@@ -227,6 +224,7 @@ function DisplayCalibration({ configuration, setConfiguration })
         ...configuration,
         calibrations: calibrations
       })
+      setMessage(undefined)
       return
     }
 
@@ -250,12 +248,17 @@ function DisplayCalibration({ configuration, setConfiguration })
       ...configuration,
       calibrations: calibrations
     })
+    setMessage(undefined)
   }
+  
+  useEffect(() => {
+    handleSubmit()
+  }, [calibrations])
 
   return (
     <Flex direction="column">
       <Box sx={{ marginBottom: '1.5rem' }}>
-        <Typography variant="h5">Display Calibration</Typography>
+        <Typography variant="h6">Display Calibration</Typography>
         <Typography>Dashboard calibration options</Typography>
       </Box>
 
@@ -275,9 +278,6 @@ function DisplayCalibration({ configuration, setConfiguration })
               ...calibrations,
               temperature: event.target.value
             })
-          }}
-          onBlur={() => {
-            handleSubmit()
           }}
           value={calibrations.temperature ? calibrations.temperature : ''}
           InputProps={{
@@ -299,9 +299,6 @@ function DisplayCalibration({ configuration, setConfiguration })
               })
             }}
             sx={{ flexGrow: 1 }}
-            onBlur={() => {
-              handleSubmit()
-            }}
             value={calibrations.moisture ? calibrations.moisture.min : ''}
           />
           <TextField
@@ -313,9 +310,6 @@ function DisplayCalibration({ configuration, setConfiguration })
               })
             }}
             sx={{ flexGrow: 1 }}
-            onBlur={() => {
-              handleSubmit()
-            }}
             value={calibrations.moisture ? calibrations.moisture.max : ''}
           />
         </Flex>
@@ -332,7 +326,7 @@ export default function GeneralConfiguration()
   const padding = isMobileView ? '1rem' : '2rem'
 
   return (
-    <Flex direction="column" grow={1} sx={{ padding: padding, gap: '1.2rem' }}>
+    <Flex direction="column" grow={1} sx={{ padding: padding, gap: '1.5rem' }}>
       <NicknameConfiguration
         configuration={configuration || {}}
         setConfiguration={setConfiguration}
@@ -342,7 +336,7 @@ export default function GeneralConfiguration()
         configuration={configuration || {}}
         setConfiguration={setConfiguration}
       />
-      <Divider />
+      <Divider/>
       <DisplayCalibration
         configuration={configuration || {}}
         setConfiguration={setConfiguration}

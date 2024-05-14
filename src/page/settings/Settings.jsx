@@ -12,8 +12,8 @@ import {
 } from '@mui/material'
 import { DeviceHub, InfoRounded } from '@mui/icons-material'
 
-import { Flex, Loading } from '../../component'
-import { AccountIcon } from '../../component/icon/AccountIcon'
+import { Flex, Loading } from '../../common/component'
+import { AccountIcon } from '../../common/component/icon/AccountIcon'
 
 import Devices from './Devices'
 import Legal from './Legal'

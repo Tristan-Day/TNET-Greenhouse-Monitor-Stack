@@ -1,4 +1,8 @@
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
+
+import dayjs from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+
 
 import {
   Typography,
@@ -9,12 +13,15 @@ import {
   Grow,
   Alert,
   InputAdornment,
+  Divider,
   Switch,
+  FormControlLabel,
   Link
 } from '@mui/material'
+import { MobileTimePicker, LocalizationProvider } from '@mui/x-date-pickers'
 
-import { Flex } from '../../component'
-import { isFloat } from '../../logic/Validation'
+import { Flex } from '../../common/component'
+import { isFloat } from '../../common/logic/Validation'
 import { ConfigurationContext } from './Configuration'
 
 function ThresholdAlerts({ configuration, setConfiguration })
@@ -64,8 +71,6 @@ function ThresholdAlerts({ configuration, setConfiguration })
         severity: 'warning',
         text: 'Minimum value cannot exceed maximum value'
       })
-    } else {
-      setMessage(undefined)
     }
 
     setAlerts({
@@ -104,10 +109,14 @@ function ThresholdAlerts({ configuration, setConfiguration })
     })
   }
 
+  useEffect(() => {
+    handleSubmit()
+  }, [alerts])
+
   return (
     <Flex direction="column">
       <Box sx={{ marginBottom: '1.5rem' }}>
-        <Typography variant="h5">Threshold Alerts</Typography>
+        <Typography variant="h6">Threshold Alerts</Typography>
         <Typography>Create optimal environmental conditions</Typography>
       </Box>
 
@@ -119,13 +128,7 @@ function ThresholdAlerts({ configuration, setConfiguration })
         </Box>
       )}
 
-      <Flex
-        sx={{
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '1rem'
-        }}
-      >
+      <Flex sx={{ alignItems: 'center', gap: '1rem' }}>
         <Select
           value={selection}
           onChange={event => {
@@ -152,7 +155,6 @@ function ThresholdAlerts({ configuration, setConfiguration })
               }
             }
             setAlerts(updatedAlerts)
-            setConfiguration({ ...configuration, alerts: updatedAlerts })
           }}
         />
       </Flex>
@@ -164,9 +166,6 @@ function ThresholdAlerts({ configuration, setConfiguration })
             handleSetMinimum(event.target.value)
           }}
           sx={{ flexGrow: 1 }}
-          onBlur={() => {
-            handleSubmit()
-          }}
           value={
             selection && alerts[selection].min ? alerts[selection].min : ''
           }
@@ -184,9 +183,6 @@ function ThresholdAlerts({ configuration, setConfiguration })
             handleSetMaximum(event.target.value)
           }}
           sx={{ flexGrow: 1 }}
-          onBlur={() => {
-            handleSubmit()
-          }}
           value={
             selection && alerts[selection].max ? alerts[selection].max : ''
           }
@@ -201,7 +197,7 @@ function ThresholdAlerts({ configuration, setConfiguration })
       </Flex>
 
       <Flex sx={{ marginTop: '1.4rem' }}>
-        <Typography variant="body">
+        <Typography>
           To find more information on how to care for your plants, please click{' '}
           <Link href="https://www.bhg.com/gardening/plant-dictionary/">
             here.
@@ -212,28 +208,98 @@ function ThresholdAlerts({ configuration, setConfiguration })
   )
 }
 
-// function SunsetReminders({ configuration, setConfiguration })
-// {
-//   const [reminders, setReminder] = useState(configuration.reminders || {})
-//   const [message, setMessage] = useState()
+function SunsetIntegration({ configuration, setConfiguration })
+{
+  const [reminders, setReminders] = useState(configuration.reminders || {
+    sunset: false, sunrise: false, custom: {enabled: false, time: '2022-04-17T17:30'}
+  })
 
-//   return (
-//     <Flex direction="column">
-//       <Box sx={{ marginBottom: '1.5rem' }}>
-//         <Typography variant="h5">Sunset Watering Reminders</Typography>
-//         <Typography>Remind me to water my plants</Typography>
-//       </Box>
+  const handleSetCustom = (property, value) => {
+    setReminders({ ...reminders, custom: {...reminders.custom, [property]: value }})
+  }
 
-//       {message && (
-//         <Box sx={{ marginBottom: '1.5rem' }}>
-//           <Grow in>
-//             <Alert severity={message.severity}>{message.text}</Alert>
-//           </Grow>
-//         </Box>
-//       )}
-//     </Flex>
-//   )
-// }
+  const handleSubmit = () => {
+    if (
+      configuration.reminders &&
+      configuration.reminders === reminders
+    ) {
+      return
+    }
+
+    setConfiguration({
+      ...configuration,
+      reminders: reminders
+    })
+  }
+
+  useEffect(() => {
+    handleSubmit()
+  }, [reminders])
+
+  return (
+    <Flex direction="column">
+      <Box sx={{ marginBottom: '1.5rem' }}>
+        <Typography variant="h6">Watering Reminders</Typography>
+        <Typography>Set a reminder to water your plants</Typography>
+      </Box>
+
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Flex sx={{ alignItems: 'center', gap: '1rem' }}>
+          <MobileTimePicker
+            onChange={event => {
+              handleSetCustom('time', event.toISOString())
+            }}
+            value={dayjs(new Date(reminders.custom.time))}
+            sx={{ flexGrow: 1 }}
+          />
+          <Switch
+            onChange={event => {
+              handleSetCustom('enabled', event.target.checked)
+            }}
+            checked={reminders.custom.enabled}
+          />
+        </Flex>
+      </LocalizationProvider>
+
+      <Flex sx={{ marginTop: '1.4rem' }}>
+        {configuration.postcode ? (
+          <Typography>Enable Automatic Reminders</Typography>
+        ) : (
+          <Typography>
+            * Set a Postcode to unlock Automatic Reminders.
+          </Typography>
+        )}
+      </Flex>
+
+      {configuration.postcode && (
+        <Flex direction="row" sx={{ marginTop: '0.7rem', gap: '1.5rem' }}>
+          <FormControlLabel
+            control={<Switch disabled={Boolean(!configuration.postcode)} />}
+            onChange={event => {
+              setReminders({
+                ...reminders,
+                sunrise: event.target.checked
+              })
+            }}
+            checked={reminders.sunrise}
+            label="At Sunrise"
+          />
+          <FormControlLabel
+            control={<Switch disabled={Boolean(!configuration.postcode)} />}
+            onChange={event => {
+              setReminders({
+                ...reminders,
+                sunset: event.target.checked
+              })
+            }}
+            checked={reminders.sunset}
+            label="At Sunset"
+          />
+        </Flex>
+      )}
+    </Flex>
+  )
+}
 
 export default function AlertConfiguration()
 {
@@ -243,8 +309,13 @@ export default function AlertConfiguration()
   const padding = isMobileView ? '1rem' : '2rem'
 
   return (
-    <Flex direction="column" grow={1} sx={{ padding: padding, gap: '1.2rem' }}>
+    <Flex direction="column" grow={1} sx={{ padding: padding, gap: '1.5rem' }}>
       <ThresholdAlerts
+        configuration={configuration || {}}
+        setConfiguration={setConfiguration}
+      />
+      <Divider />
+      <SunsetIntegration
         configuration={configuration || {}}
         setConfiguration={setConfiguration}
       />
