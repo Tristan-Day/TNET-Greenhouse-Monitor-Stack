@@ -1,7 +1,7 @@
 import { Typography, Card } from '@mui/material'
 import { Gauge, LineChart } from '@mui/x-charts'
 
-import { Flex } from '.'
+import { Flex } from '../common/component'
 
 export function ValueCard({ name, units, value, colour })
 {

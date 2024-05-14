@@ -1,5 +1,6 @@
 import { useEffect, useContext, useState } from 'react'
 import { useParams, useNavigate, Route } from 'react-router-dom'
+import { useInterval } from '../common/Interval'
 
 import {
   Box,
@@ -25,15 +26,14 @@ import {
 import { getAlerts } from './logic/Alerts'
 
 import {
-  Flex,
   ValueCard,
   GaugeCard,
   ChartCard,
-  Loading
-} from '../common/component'
-import { useInterval } from '../common/Interval'
+} from './Cards'
 
 import { TransmitterIcon } from '../common/component/icon/TransmitterIcon'
+import { Flex, Loading } from '../common/component'
+
 import { ConfigurationRoutes } from '../page/configuration'
 import { WindowContext } from '../Navigation'
 
