@@ -315,7 +315,6 @@ function Dashboard()
   const [device, setDevice] = useState()
   const [model, setModel] = useState()
 
- 
   const refreshMonitoringData = async () => 
   {
     setMessages([])
@@ -388,7 +387,7 @@ function Dashboard()
   }
 
   // Interval hooks to periodically refresh data
-  useInterval(refreshMonitoringData, 660000)
+  useInterval(refreshMonitoringData, 50000)
   useInterval(refreshAlertData, 10000)
 
   // Effect hook to set the window title and import data from localstorage
