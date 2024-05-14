@@ -406,10 +406,12 @@ function Dashboard()
 
   // Effect hook to process data from localstorage
   useEffect(() => {
-    windowContext.setWindow({
-      ...windowContext.window,
-      message: `Last Transmission: ${model?.getFormattedTimestamp() || '-'}`
-    })
+    if (model) {
+      windowContext.setWindow({
+        ...windowContext.window,
+        message: `Last Transmission: ${model.getFormattedTimestamp()}`
+      })
+    }
 
     if (device?.configuration && model) {
       refreshAlertData()
