@@ -23,11 +23,22 @@ export function ValueCard({ name, units, value, colour })
 
 export function GaugeCard({ name, value, min, max })
 {
+  min = min || 1000
+  max = max || 3000
+
+  if (value < min) {
+    min = value
+  }
+
+  if (value > max) {
+    max = value
+  }
+
   return (
     <Card className="GaugeCard">
       <Gauge
         width={110} height={60} startAngle={-90} endAngle={90}
-        valueMin={min || 1000} valueMax={max || 4000} value={value}
+        valueMin={min} valueMax={max} value={value}
       />
       <Typography variant="caption">{name}</Typography>
     </Card>
@@ -40,8 +51,7 @@ export function ChartCard({ dataset, series, legend })
     ? {
         legend: {
           padding: { top: -10 },
-          itemGap: 20,
-          markGap: 10
+          itemGap: 20, markGap: 10
         }
       }
     : {

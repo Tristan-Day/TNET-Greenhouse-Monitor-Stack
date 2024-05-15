@@ -200,7 +200,9 @@ function ForecastIntegration({ configuration, setConfiguration })
 
 function DisplayCalibration({ configuration, setConfiguration })
 {
-  const [calibrations, setCalibrations] = useState(configuration.calibrations || {})
+  const [calibrations, setCalibrations] = useState(configuration.calibrations || {
+    temperature: null, moisture: {min: 1000, max: 3000} 
+  })
   const [message, setMessage] = useState()
 
   const handleSubmit = () => {
@@ -219,16 +221,23 @@ function DisplayCalibration({ configuration, setConfiguration })
       return
     }
 
-    if (!calibrations.moisture) {
-      setConfiguration({
-        ...configuration,
-        calibrations: calibrations
+    if (!calibrations.moisture.min) {
+      setMessage({
+        severity: 'error',
+        text: 'Please enter a minimum moisture level'
       })
-      setMessage(undefined)
       return
     }
 
-    if (calibrations.moisture.min && !isPositiveFloat(calibrations.moisture.min)) {
+    if (!calibrations.moisture.max) {
+      setMessage({
+        severity: 'error',
+        text: 'Please enter a maximum moisture level'
+      })
+      return
+    }
+
+    if (!isPositiveFloat(calibrations.moisture.min)) {
       setMessage({
         severity: 'error',
         text: 'Moisture calibration values must be a positive decimal'
@@ -236,7 +245,7 @@ function DisplayCalibration({ configuration, setConfiguration })
       return
     }
 
-    if (calibrations.moisture.max && !isPositiveFloat(calibrations.moisture.max)) {
+    if (!isPositiveFloat(calibrations.moisture.max)) {
       setMessage({
         severity: 'error',
         text: 'Moisture calibration values must be a positive decimal'
@@ -244,6 +253,14 @@ function DisplayCalibration({ configuration, setConfiguration })
       return
     }
 
+    if (calibrations.moisture.max < calibrations.moisture.min) {
+      setMessage({
+        severity: 'error',
+        text: 'Minimum moisture value cannot exceed maximum value'
+      })
+      return
+    }
+    
     setConfiguration({
       ...configuration,
       calibrations: calibrations

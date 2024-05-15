@@ -39,7 +39,59 @@ function handleParameterAlarms(configuration, model)
       continue
     }
 
-    if (properties.min)
+    if (name === 'moisture')
+    {      
+      const A = model.getLatestValue('SoilMoisturePrimary')
+      const B = model.getLatestValue('SoilMoistureSecondary')
+
+      if (properties.min)
+      {
+        const minimum = parseFloat(properties.min)
+
+        if (A < minimum) {
+          const label =
+            configuration?.nicknames?.sensors?.A &&
+            `Moisture Sensor '${configuration.nicknames.sensors.A}'`
+
+          const text = `${label || 'Soil Sensor A'} has fallen below the minimum moisture target`
+          alerts.push({ severity: 'warning', text: text })
+        }
+
+        if (B < minimum) {
+          const label =
+            configuration?.nicknames?.sensors?.B &&
+            `Moisture Sensor '${configuration.nicknames.sensors.B}'`
+
+          const text = `${label || 'Soil Sensor B'} has fallen below the minimum moisture target`
+          alerts.push({ severity: 'warning', text: text })
+        }
+      }
+      else if (properties.max) 
+      {
+        const maximum = parseFloat(properties.max)
+
+        if (A > maximum) {
+          const label =
+            configuration?.nicknames?.sensors?.A &&
+            `Moisture Sensor '${configuration.nicknames.sensors.A}'`
+
+          const text = `${label || 'Soil Sensor A'} has exceeded the maximum moisture target`
+          alerts.push({ severity: 'warning', text: text })
+        }
+
+        if (B > maximum) {
+          const label =
+            configuration?.nicknames?.sensors?.B &&
+            `Moisture Sensor '${configuration.nicknames.sensors.B}'`
+
+          const text = `${label || 'Soil Sensor B'} has exceeded the maximum moisture target`
+          alerts.push({ severity: 'warning', text: text })
+        }
+      }
+      continue
+    }
+
+    else if (properties.min)
     {
       const minimum = parseFloat(properties.min)
       const value = model.getLatestValue(name)
@@ -49,8 +101,7 @@ function handleParameterAlarms(configuration, model)
         const difference = (minimum - value).toPrecision(2)
 
         const text = `${name.charAt(0).toUpperCase() + name.slice(1)}
-           is ${difference}
-           ${properties.units && properties.units} below target`
+           is ${difference} ${properties.units && properties.units} below target`
 
         alerts.push({ severity: 'warning', text: text })
         continue
@@ -67,8 +118,7 @@ function handleParameterAlarms(configuration, model)
         const difference = (value - maximum).toPrecision(2)
 
         const text = `${name.charAt(0).toUpperCase() + name.slice(1)}
-          is ${difference}
-          ${properties.units && properties.units} above target`
+          is ${difference}${properties.units && properties.units} above target`
 
         alerts.push({ severity: 'warning', text: text })
         continue
@@ -84,7 +134,7 @@ async function handleSunsetReminders(configuration, model)
   let alerts = []
 
   const isWithinRange = (date) => {
-    return Math.abs(new Date() - date) < (60 * 60 * 1000);
+    return new Date().getHours() === date.getHours()
   }
 
   let solar = {}
@@ -92,7 +142,8 @@ async function handleSunsetReminders(configuration, model)
   if (configuration.location)
   {
     const location = configuration.location
-    try {
+    try 
+    {
       const response = await getSolarData(location.lat, location.lon)
       if (response.ok) {
         const data = (await response.json()).daily
@@ -100,13 +151,16 @@ async function handleSunsetReminders(configuration, model)
           sunrise: data.sunrise[0],
           sunset: data.sunset[0]
         }
-      } else {
+      } 
+      else {
         alerts.push({
           severity: 'error',
           text: 'Failed to retreive solar data'
         })
       }
-    } catch {
+    } 
+    catch 
+    {
       alerts.push({
         severity: 'error',
         text: 'Failed to retreive solar data'

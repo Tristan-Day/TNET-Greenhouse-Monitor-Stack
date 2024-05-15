@@ -152,12 +152,12 @@ function CurrentData({ model, configuration })
         value={model.getLatestValue('SoilMoisturePrimary')}
         min={
           (configuration.calibrations?.moisture &&
-            configuration.calibrations.moisture.min) ||
+            parseFloat(configuration.calibrations.moisture.min)) ||
           undefined
         }
         max={
           (configuration.calibrations?.moisture &&
-            configuration.calibrations.moisture.max) ||
+            parseFloat(configuration.calibrations.moisture.max)) ||
           undefined
         }
       />
@@ -170,12 +170,12 @@ function CurrentData({ model, configuration })
         value={model.getLatestValue('SoilMoistureSecondary')}
         min={
           (configuration.calibrations?.moisture &&
-            configuration.calibrations.moisture.min) ||
+            parseFloat(configuration.calibrations.moisture.min)) ||
           undefined
         }
         max={
           (configuration.calibrations?.moisture &&
-            configuration.calibrations.moisture.max) ||
+            parseFloat(configuration.calibrations.moisture.max)) ||
           undefined
         }
       />
@@ -378,11 +378,17 @@ function Dashboard()
 
   // Handle to process data and show any alerts
   const refreshAlertData = async () => {
+    const alerts = await getAlerts(device.configuration, model)
+
+    if (messages?.alerts === alerts) {
+      return
+    }
+
     setMessages([
       ...messages.filter(message => {
         return message.type !== 'alert'
       }),
-      ...await getAlerts(device.configuration, model)
+      ...alerts
     ])
   }
 

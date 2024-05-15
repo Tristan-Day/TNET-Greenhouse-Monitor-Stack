@@ -27,7 +27,8 @@ import { ConfigurationContext } from './Configuration'
 function ThresholdAlerts({ configuration, setConfiguration })
 {
   const [alerts, setAlerts] = useState(
-    configuration.alerts || {
+    configuration.alerts || 
+    {
       temperature: { enabled: false, min: '', max: '', units: "°C" }, 
       humidity:    { enabled: false, min: '', max: '', units: "%" },
       moisture:    { enabled: false, min: '', max: '', units: "" }
@@ -117,7 +118,7 @@ function ThresholdAlerts({ configuration, setConfiguration })
     <Flex direction="column">
       <Box sx={{ marginBottom: '1.5rem' }}>
         <Typography variant="h6">Threshold Alerts</Typography>
-        <Typography>Create optimal environmental conditions</Typography>
+        <Typography>Optimise your growing environment</Typography>
       </Box>
 
       {message && (
@@ -266,7 +267,7 @@ function SunsetIntegration({ configuration, setConfiguration })
           <Typography>Enable Automatic Reminders</Typography>
         ) : (
           <Typography>
-            * Set a Postcode to unlock Automatic Reminders.
+            * Set a postcode to unlock Automatic Reminders.
           </Typography>
         )}
       </Flex>
