@@ -253,7 +253,7 @@ function DisplayCalibration({ configuration, setConfiguration })
       return
     }
 
-    if (calibrations.moisture.max < calibrations.moisture.min) {
+    if (parseFloat(calibrations.moisture.max) < parseFloat(calibrations.moisture.min)) {
       setMessage({
         severity: 'error',
         text: 'Minimum moisture value cannot exceed maximum value'
